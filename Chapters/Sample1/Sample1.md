@@ -17,9 +17,9 @@ to industrial code.
 
 As shown in Figure *@bluefig@*
 
-![Pharo logo is great.](figures/pharo.png width=50&label=bluefig)
+![Pharo logo is great. %width=50&anchor=bluefig](figures/pharo.png)
 
-### Presentation
+### Presentat
 
 Notice that 
 - section titles are not uppercased.
@@ -27,7 +27,7 @@ Notice that
 
 ### Implementation insights
 
-```
+```anchor=list1
 ZerotronerHandler >> depositron: aCol
 
 	...
