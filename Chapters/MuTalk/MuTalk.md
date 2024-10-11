@@ -1,7 +1,7 @@
 ## MuTalk : A Mutation Testing Framework
 
 
-_Authors:_ Prof. T. Tournesol -- Moulinsart Lab, Belgium -- tryphon.tournesol@moulinsart.be and Prof. H. Ochanomizu -- AstroLabs, Japan -- hiro.ochanomizu@astroLabs.jp
+_Authors:_ Prof. T. Tournesol -- Moulinsart Lab, Belgium -- tryphon.tournesol@moulinsart.be and Prof. H. Ochanomizu -- AstroLabs, Japan -- hiro.ochanomizu@astroLabs.jp %TODO
 
 Mutation testing is a way of measuring the quality and completeness of a project's tests suite. While code coverage is used to make sure that tests execute each method or line of code, mutation testing evaluate the ability to detect new errors. It involves introducing errors and running the tests to see if they are detected. MuTalk is a flexible mutation framework providing good default values for analyzing a test suite. It can be customized to fit specific domains or projects.
 Through this chapter we will discuss :
@@ -38,7 +38,7 @@ hasFourWheels: aVehicle
 
 Two examples of mutations are changing the number of wheel and changing the comparison sign. This could result in the following mutants :
 
-- Turning a "4" into a "3"
+- Decreasing a "4" into a "3"
 ```smalltalk
 "Mutant on the number of wheels"
 hasFourWheels: aVehicle
@@ -84,7 +84,7 @@ With those, the analysis then goes through 4 phases:
 * [An initial test run](#Initial-test-run)
 * [A coverage analysis](#Coverage-analysis)
 * [The generation of mutants](#Mutant-generation)
-* [The evaluation of mutants, also called the results generation](#Results-generation)  
+* [The evaluation of mutants, also called the results generation](#Evaluation-of-mutants)  
 
 ##### Initial test run
 
@@ -97,8 +97,7 @@ This phase is a regular coverage analysis used for test selection and mutant sel
 ##### Mutant generation
 
 During this phase, the analysis creates the mutants of the source code using its mutant operators.
-
-##### Results generation
+##### Evaluation of mutants
 
 In this phase, the analysis takes the mutants and apply them one by one, one at a time. It installs a mutant and runs each selected test: this is the mutant evaluation. The evaluation stops at the first failing test or when every test has been run. Then the mutant is uninstalled, and it moves on to the next mutant.
 
@@ -154,6 +153,10 @@ TODO, UUID example
 
 
 MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
+
+#### The result object
+%TODO: structure de l'object + screenshot inspecteur
+
 
 #### Mutation matrix: a visual representation
 
@@ -353,50 +356,20 @@ To use this strategy:
     myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new targetMethods: { method1 . method2 }
     ```
 
-#### Mutant selection strategies
 
-Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
-```smalltalk
-analysis mutantGenerationStrategy mutantSelectionStrategy: myMutantSelectionStrategy
-```
-* `MTRandomMutantSelectionStrategy`  
-The default strategy is to mix all mutants randomly and indiscriminately. %What does mix means ? To get an accurate mutation score ?
-
-* `MyMutantSelectionStrategy`  
-This strategy consists simply in not mixing the list of mutants and returning it as it is.
-
-![](./figures/Random1.png)
-
-* `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`.  
-These strategies also mix mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
-These strategies are particularly useful when reducing the number of mutants analyzed with budgets (see below %TODO link). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
-
-![](./figures/Random2.png)
-
-![%width=50](./figures/Distrib3.png)  
-In this example, a random operator selection strategy ensures that operator D is almost certainly represented in the results, which is not guaranteed with conventional random selection. 
-
-#### Test selection strategies
-
-Test selection strategies are ways of choosing which tests will be run during analysis. In MuTalk, they have the tag *Test selection strategies* and are used as follows:
-```smalltalk
-analysis mutantGenerationStrategy: myTestSelectionStrategy
-```
-* `MTSelectingFromCoverageTestSelectionStrategy`  
-The default is to select only those tests that cover mutants, to speed up analysis. In other words, if a test does not use the mutated method, it will not be run.
-
-* `MTAllTestsMethodsRunningTestSelectionStrategy`  
-Another more basic strategy is to run all tests all the time, but this is more time-consuming.
-
-
-
-#### Execution budgets
+#### Budgeted analysis
 
 Execution budgets define limits to the analysis, such as an execution time limit. In MuTalk, they have the tag *Budgets* and are used as follows:
 ```smalltalk
 analysis budget: myBudget
 ```
 
+* `MTTimeBudget`  
+The default budget imposes a time limit on the analysis. After this time, the analysis ends.  
+To use it, you need to give a time, for example:
+    ```smalltalk
+    myBudget := MTTimeBudget for: 2 minutes
+    ```
 * `MTFreeBudget`  
 This budget imposes no restrictions on analysis.
 
@@ -409,14 +382,32 @@ To use them, you need to specify a number of mutants or a percentage, as follows
     myBudget := MTPercentageOfMutantsBudget for: 50
     ```
 
-* `MTTimeBudget`  
-The default budget imposes a time limit on the analysis. After this time, the analysis ends.  
-To use it, you need to give a time, for example:
-    ```smalltalk
-    myBudget := MTTimeBudget for: 2 minutes
-    ```
+#### Mutant selection strategies for budgeted analysis
 
-#### Test filters
+When running [an analysis with a budget](#execution-budgets), not all mutants can be evaluated. Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
+```smalltalk
+analysis mutantGenerationStrategy mutantSelectionStrategy: myMutantSelectionStrategy
+```
+* `MTRandomMutantSelectionStrategy`  
+The default strategy is to shuffle all mutants randomly and indiscriminately.
+
+
+* `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`.  
+These strategies also mix mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
+These strategies are particularly useful when reducing the number of mutants analyzed with budgets (see below %TODO link). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
+
+![](./figures/Random2.png)
+
+![%width=50](./figures/Distrib3.png)
+
+In this example, a random operator selection strategy ensures that operator D is almost certainly represented in the results, which is not guaranteed with conventional random selection. 
+
+* `MTMutantSelectionStrategy`  
+This strategy consists simply in not mixing the list of mutants and returning it as it is. This should NOT be used with a budgeted analysis as it would result in a very biased selection.
+
+
+#### General test filters
+
 
 Test filters allow you to block certain tests according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
 ```smalltalk
@@ -464,6 +455,19 @@ To use it:
     myTestFilter := MTCompositeTestFilter for: { testFilter1 . testFilter2 }
     ```
 
+#### Per mutant test selection
+
+Test selection strategies are ways of choosing which tests will be run during analysis. In MuTalk, they have the tag *Test selection strategies* and are used as follows:
+```smalltalk
+analysis mutantGenerationStrategy: myTestSelectionStrategy
+```
+* `MTSelectingFromCoverageTestSelectionStrategy`  
+The default is to select only those tests that cover mutants, to speed up analysis. In other words, if a test does not use the mutated method, it will not be run.
+
+* `MTAllTestsMethodsRunningTestSelectionStrategy`  
+Another more basic strategy is to run all tests all the time, but this is more time-consuming.
+
+
 #### Loggers
 
 Loggers provide traces of analysis execution. Depending on the logger used, this trace will be visible in different places. In MuTalk, they have the *Logging* tag and are used as follows:
@@ -487,3 +491,17 @@ This logger writes the trace to Pharo's Transcript.
 * `MTProgressBarLogger`  
 This logger is selected by default for analysis. It uses a progress bar to display the progress of the analysis in real time.
 
+=======
+
+### 5. Specific cases
+
+#### UUID : A singleton case, or How to add tear down during the analysis
+
+#### Handling core classes 
+
+
+### 6. Mutation Analysis - Variations on Mutation Testing
+
+
+#### Ref au travail de Balsa
+#### Mutation analysis for reflection ?
