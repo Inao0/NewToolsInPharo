@@ -1,4 +1,4 @@
-## MuTalk : A Mutation Testing Framework
+## MuTalk : A Mutation Testing Framework
 
 
 _Authors:_ Prof. T. Tournesol -- Moulinsart Lab, Belgium -- tryphon.tournesol@moulinsart.be and Prof. H. Ochanomizu -- AstroLabs, Japan -- hiro.ochanomizu@astroLabs.jp %TODO
@@ -10,11 +10,11 @@ Through this chapter we will discuss :
 - 3. Available options in MuTalk
 - 4. Mutation analysis : variants on mutation testing
 
-### 1. Introduction to Mutation Testing
+### Introduction to Mutation Testing
 
 #### Principles of Mutation Testing and Vocabulary
 
-Mutation testing allows one to measure the quality and completeness of a project's tests suite. This is done by introducing errors, known as **mutations**, into the source code of a project, for example in a method. This modified method is called a **mutant**. The version of the code containing a mutant is called the **mutated code** The idea behind mutations is to simulate real mistakes that developers can make.
+Mutation testing allows one to measure the quality and completeness of a project's tests suite. This is done by introducing errors, known as **mutations**, into the source code of a project, for example in a method. This modified method is called a **mutant**. The version of the code containing a mutant is called the **mutated code**. The idea behind mutations is to simulate real mistakes that developers can make.
 
 ![Mutation vocabulary](./figures/Mutant.png)
 
@@ -28,12 +28,12 @@ Then the tests are run for each mutant to see if they are able to detect it. The
 A common observation when performing mutation testing on a project is that certain use cases have not been tested.
 
 
-#### an Example
+#### An example
 
-Let's look at the following example method :
+Let's look at the following example method from the class `MyVehicle` :
 ```smalltalk
-hasFourWheels: aVehicle
-^ (aVehicle numberOfWheels = 4)
+hasFourWheels:
+^ self numberOfWheels = 4
 ```
 
 Two examples of mutations are changing the number of wheel and changing the comparison sign. This could result in the following mutants :
@@ -41,23 +41,24 @@ Two examples of mutations are changing the number of wheel and changing the comp
 - Decreasing a "4" into a "3"
 ```smalltalk
 "Mutant on the number of wheels"
-hasFourWheels: aVehicle
-^ (aVehicle numberOfWheels = 3)
+hasFourWheels:
+^ self numberOfWheels = 3
 ```
 
 - Turning a "=" into a ">="
 ```smalltalk
 "Mutant on comparison sign"
-hasFourWheels: aVehicle
-^ (aVehicle numberOfWheels >= 4)
+hasFourWheels:
+^ self numberOfWheels >= 4
 ```
 
 Let's imagine that we have only the following test :
 ```smalltalk
 testHasFourWheels
  "Create a vehicule object with 4 wheels"
- car = aVehicule newWithWheels: 4
- self assert: car hasFourWheels.
+ | aVehicle |
+ aVehicle := MyVehicle newWithWheels: 4.
+ self assert: aVehicle hasFourWheels
 ```
 
 The mutant on the number of wheels will result in this test failing. This mutant has been killed.
@@ -68,12 +69,14 @@ The mutant on the comparison sign will pass the test. This mutant has survived.
 
 The ideal case for a test suite is to kill all mutants, as the tests are designed to detect errors in the code. If mutants are not killed, this means that if a real error is introduced into the project's source code during a development phase, it may not be detected before deployment and cause bugs later on.
 
-The number of mutants killed is summarized with a mutation score. This score is defined as the ratio between the number of mutants killed and the total number of mutants. A score above **50%** is considered correct, and above **80%** good. %TODO:source
+The number of mutants killed is summarized with a mutation score, defined as:
 
-![Mutation Score %width=80](./figures/Score.png)
+$$ %label=mutationScore
+Mutation\:score = \frac{Number\:of\:killed\:mutants}{Total\:number\:of\:mutants}
+$$
 
 
-### 2. How to use MuTalk
+### How to use MuTalk
 
 MuTalk is Pharo's mutation testing library. It can be found on [GitHub](https://github.com/pharo-contributions/mutalk) {!footnote|note=[](https://github.com/pharo-contributions/mutalk)} and is loaded using Metacello (See (Quick Start)[#quick-start] for code snippet). It allows you to perform mutation testing on a set of Pharo classes or on a set of packages.
 
@@ -88,7 +91,7 @@ With those, the analysis then goes through 4 phases:
 
 ##### Initial test run
 
-During this phase, the analysis will run every tests it was given. If a test fails, the analysis stops and inform the user that they should fix the tests. To avoid this, check the [red test filter](*@redTestFilters@*).%TODO
+The analysis will run every tests it was given. If a test fails, the analysis stops and inform the user that they should fix the tests. To avoid this, check the [red test filter](*@redTestFilters@*).%TODO
 
 ##### Coverage analysis
 
@@ -96,10 +99,11 @@ This phase is a regular coverage analysis used for test selection and mutant sel
 
 ##### Mutant generation
 
-During this phase, the analysis creates the mutants of the source code using its mutant operators.
+Here the analysis creates the mutants of the source code using its mutant operators.
+
 ##### Evaluation of mutants
 
-In this phase, the analysis takes the mutants and apply them one by one, one at a time. It installs a mutant and runs each selected test: this is the mutant evaluation. The evaluation stops at the first failing test or when every test has been run. Then the mutant is uninstalled, and it moves on to the next mutant.
+Finally, the analysis takes the mutants and apply them one by one. It installs a mutant and runs each selected test: this is the mutant evaluation. The evaluation stops at the first failing test or when every test has been run. Then the mutant is uninstalled, and it moves on to the next mutant.
 
 
 #### Quick start
@@ -144,39 +148,52 @@ analysis run.
 analysis generalResult inspect
 ```
 
-#### Example of Analysis
+#### Example of Analysis
 
-TODO, UUID example
+```smalltalk
+analysis := MTAnalysis new
+	            classesToMutate: { MyVehicle };
+	            testClasses: { MyVehicleTest }.
+analysis run.
+analysis generalResult inspect
+```
 
-
-### 3. Exploring the results
-
+### Exploring the results
 
 MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
 
 #### The result object
-%TODO: structure de l'object + screenshot inspecteur
 
+![Inspector on generalResult](./figures/Inspector.png)
+
+This is the inspector on the `generalResult` object of the analysis. There are a few things to note here:
+* It contains 4 more tabs than the usual inspector that are specific to the mutation analysis: TODO sublist
+    - The `Surviving Mutants` tab lists all the mutants that survived.
+    - The `Killed Mutants` tab lists all the mutants that were killed.
+    - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
+    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
+* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right.
+* The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
 
 #### Mutation matrix: a visual representation
 
 The mutation matrix is a matrix representing the results of mutant tests. It shows which test killed which mutant.    
 There are several ways to use it:
-* with a class, assuming the associated test class has the same name with the suffix “Test”:
+* with a collection of classes, assuming the associated test classes have the same names with the suffix “Test”:
     ```smalltalk
-    matrix := MTMatrix forAClass: AClass
+    matrix := MTMatrix forClasses: { AClass1 . AClass2 }
     ```
 * with a collection of classes and a collection of test classes:
     ```smalltalk
     matrix := MTMatrix forClasses: { AClass1 . AClass2 } andTests: { ATestClass1 . ATestClass2 . ATestClass3 }
     ```
-* with a package, assuming that the associated test package has the same name with the suffix “-Tests”:
+* with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”:
     ```smalltalk
-    matrix := MTMatrix forAPackage: 'APackage'
+    matrix := MTMatrix forPackages: { APackage1 . APackage2 }
     ```
-* with a package and a test package:
+* with a collection of packages and a collection of test packages:
     ```smalltalk
-    matrix := MTMatrix forAPackage: 'APackage' andTestPackage: 'APackage-Tests'
+    matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
     ```
 
 Once created, the matrix must be constructed:
@@ -189,7 +206,20 @@ The matrix can be displayed as follows:
 matrix generateMatrix
 ```
 
-%TODO matrix on UUID
+Here is the top of a matrix built on the class `UUID`:
+
+![Matrix of UUID](./figures/Matrix.png)
+
+The rows are the mutants, and the columns the tests. A blue box means the mutant is killed by the test.
+
+A heatmap can also be generated. It groups mutants by mutation operators and tests by class.  
+The heatmap can be displayed as follows:
+```smalltalk
+matrix generateHeatmap
+```
+
+This is the top of an heatmap built also on `UUID`:
+![Heatmap of UUID](./figures/Heatmap.png)
 
 It is now possible to obtain several pieces of information:
 
@@ -225,7 +255,7 @@ operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyClass1 . MyClass2 }
 ```
 or
 ```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . MyPackage2 }
+operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
 ```
 and then:
 ```smalltalk
@@ -245,7 +275,7 @@ analysis := MTNonMutatedMethodsAnalysis forClasses: { MyClass1 . MyClass2 }
 ```
 or
 ```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . MyPackage2 }
+analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
 ```
 Finally, to have the methods without mutation:
 ```smalltalk
@@ -253,7 +283,7 @@ analysis findMethodsWithoutMutation inspect
 ```
 
 
-### 4. The different options in MuTalk
+### The different options in MuTalk
 MuTalk offers several options for configuring the analysis.  
 **Note:** In the following, if nothing is specified regarding the use of the objects mentioned, simply create the object with `new`. If you need to specify an additional parameter when creating the object, this will be indicated.
 
@@ -262,14 +292,9 @@ MuTalk offers several options for configuring the analysis.
 Mutation operators are objects that define a type of mutation and how to perform it. For example, there's a mutation operator that changes a `+` into a `-`. In MuTalk, they all have an *Operators* tag and are subclasses of `MTAbstractMutantOperator`. By default, they are all used, but if you want to use only some of them, proceed as follows:
 ```smalltalk
 analysis operators: { operator1 . operator2 . operator3 }
-```
+``` 
 
-Operators are objects that describe a type of mutation. They're like a guideline on how to perform the mutation they correspond to.
-There are two ways to tell the analysis which operators you want to use:
-* `MTAbstractMutantOperator contents` that returns all operators minus a few ones that are implemented a bit differently that the others %TODO
-* `MTAbstractMutantOperator contentsAll` that returns the whole set of operators and that is used by default for analysis  
-
-There are a lot of operators, available by default in MuTalk. *@tabAllOperators@* provides a list. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.
+There are a lot of operators, available by default in MuTalk. *@tabAllOperators@* provides a list. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.TODO
 
 
 %TODO fix ?
@@ -284,7 +309,7 @@ There are a lot of operators, available by default in MuTalk. *@tabAllOperators@
 |                               | Remove second block argument for `detect:ifNone:` |
 |         --                    |     --    |     --    |
 | Arithmetic                    | Replace `*` by `/` |
-|   replacement                 | Replace `/` with `*` | 
+|   replacement                 | Replace `/` with `*` |
 |                               | Replace `+` with `-` |
 |                               | Replace `-` with `+` |
 |         --                    |     --    |     --    |
@@ -337,7 +362,7 @@ There are a lot of operators, available by default in MuTalk. *@tabAllOperators@
 | Other                         | Replace assignment value with `nil` |
 |                               | Replace class reference by references to its subclasses |
 
-#### Mutant generation strategies
+#### Selection of methods to be mutated
 
 Mutant generation strategies are ways of choosing which methods will be mutated. They are tagged *Mutant generation strategies* in MuTalk and are used as follows:
 ```smalltalk
@@ -382,25 +407,33 @@ To use them, you need to specify a number of mutants or a percentage, as follows
     myBudget := MTPercentageOfMutantsBudget for: 50
     ```
 
-#### Mutant selection strategies for budgeted analysis
+What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
+
+For example, this is a graph of mutation score as a function of the percentage of mutants evaluated.
+![](./figures/Score%20percent%20graph.png)
+For each percent, an analysis was run 10 times with a simple random mutant selection strategy, and the mutation score of each analysis was computed. Then a boxplot was drawn with those 10 scores. 
+
+It shows that even though there is a greater variance the lower the percentage is, the median is still relatively close to the mutation score at 100%.
+
+#### Selection of mutants to be evaluated for budgeted analysis
 
 When running [an analysis with a budget](#execution-budgets), not all mutants can be evaluated. Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
 ```smalltalk
 analysis mutantGenerationStrategy mutantSelectionStrategy: myMutantSelectionStrategy
 ```
-* `MTRandomMutantSelectionStrategy`  
-The default strategy is to shuffle all mutants randomly and indiscriminately.
 
-
-* `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`.  
-These strategies also mix mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
+* `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`  
+These strategies shuffle mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
 These strategies are particularly useful when reducing the number of mutants analyzed with budgets (see below %TODO link). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
 
-![](./figures/Random2.png)
-
-![%width=50](./figures/Distrib3.png)
+![Process of specific random selections](./figures/Random2.png)
+![Mutant repartition with basic random selection %width=50](./figures/Distrib.png)
+![Mutant repartition with random operator selection %width=50](./figures/Distrib%202.png)
 
 In this example, a random operator selection strategy ensures that operator D is almost certainly represented in the results, which is not guaranteed with conventional random selection. 
+
+* `MTRandomMutantSelectionStrategy`  
+This strategy is to shuffle all mutants randomly and indiscriminately.
 
 * `MTMutantSelectionStrategy`  
 This strategy consists simply in not mixing the list of mutants and returning it as it is. This should NOT be used with a budgeted analysis as it would result in a very biased selection.
@@ -408,11 +441,18 @@ This strategy consists simply in not mixing the list of mutants and returning it
 
 #### General test filters
 
-
-Test filters allow you to block certain tests according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
+Test filters allow you to block certain tests for the whole analysis according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
 ```smalltalk
 analysis testFilter: myTestFilter
 ```
+
+* `MTCompositeTestFilter`  
+This is the default test filter used by the analysis, used with a red test filter and a time test filter.
+This test filter works as a combination of multiple test filters. It has a collection of test filters as an attribute, and the test collection passes through each filter. A test is blocked by the composite if any of its filters blocks the test, and it passes through the composite if it passes through all its filters.  
+To use it:
+    ```smalltalk
+    myTestFilter := MTCompositeTestFilter for: { testFilter1 . testFilter2 }
+    ```
 
 * `MTFreeTestFilter`  
 This filter lets everything through.
@@ -448,21 +488,15 @@ This is how it is used:
     myTestFilter := MTTimeTestFilter for: 2 seconds
     ```
 
-* `MTCompositeTestFilter`  
-This last filter allows you to combine several filters in series.  
-To use it:
-    ```smalltalk
-    myTestFilter := MTCompositeTestFilter for: { testFilter1 . testFilter2 }
-    ```
 
 #### Per mutant test selection
 
-Test selection strategies are ways of choosing which tests will be run during analysis. In MuTalk, they have the tag *Test selection strategies* and are used as follows:
+Test selection strategies are ways of choosing which tests will be run for each mutant evaluation. In MuTalk, they have the tag *Test selection strategies* and are used as follows:
 ```smalltalk
 analysis mutantGenerationStrategy: myTestSelectionStrategy
 ```
 * `MTSelectingFromCoverageTestSelectionStrategy`  
-The default is to select only those tests that cover mutants, to speed up analysis. In other words, if a test does not use the mutated method, it will not be run.
+The default is to select only those tests that cover mutants, to speed up analysis. In other words when evaluating a mutant, if a test does not use the mutated method, it will not be run for this evaluation.
 
 * `MTAllTestsMethodsRunningTestSelectionStrategy`  
 Another more basic strategy is to run all tests all the time, but this is more time-consuming.
@@ -475,6 +509,9 @@ Loggers provide traces of analysis execution. Depending on the logger used, this
 analysis logger: myLogger
 ```
 
+* `MTProgressBarLogger`  
+This logger is selected by default for analysis. It uses a progress bar to display the progress of the analysis in real time.
+
 * `MTNullLogger`  
 This logger logs nothing.
 
@@ -486,21 +523,18 @@ To use it:
     ```
 
 * `MTTranscriptLogger`  
-This logger writes the trace to Pharo's Transcript.
-
-* `MTProgressBarLogger`  
-This logger is selected by default for analysis. It uses a progress bar to display the progress of the analysis in real time.
+This logger writes the trace in the Pharo's Transcript.
 
 =======
 
-### 5. Specific cases
+### Specific cases
 
 #### UUID : A singleton case, or How to add tear down during the analysis
 
 #### Handling core classes 
 
 
-### 6. Mutation Analysis - Variations on Mutation Testing
+### Mutation Analysis - Variations on Mutation Testing
 
 
 #### Ref au travail de Balsa
