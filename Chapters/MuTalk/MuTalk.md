@@ -148,147 +148,12 @@ analysis run.
 analysis generalResult inspect
 ```
 
-### Exploring the results
 
-MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
-
-#### Example of Analysis
-
-Here is an example of mutation testing analysis with provided example classes. Let's look at the results.
-```smalltalk
-analysis := MTAnalysis new
-	            classesToMutate: { MyVehicle };
-	            testClasses: { MyVehicleTest }.
-analysis run.
-analysis generalResult inspect
-```
-
-#### The result object
-
-This is the inspector on the `generalResult` object of the analysis. There are a few things to note here:
-* It contains 4 more tabs than the usual inspector that are specific to the mutation analysis: TODO sublist
-    - The `Surviving Mutants` tab lists all the mutants that survived.
-    - The `Killed Mutants` tab lists all the mutants that were killed.
-    - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
-    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
-* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Diffeerences are highlighted in green and red.
-* The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
-
-![Inspector on generalResult, showing the "Killed mutants" tab. The "Surviving mutants" and "Terminated mutants" tabs look the same. Under the tab there is the list of mutants with their full name. Under this there is a comparison between the original method and the mutant. At the bottom there is the usual inspector playground.](./figures/Inspector.png) (TODO excluded tests)
-
-#### Mutation matrix: a visual representation
-
-The mutation matrix is a matrix representing the results of mutant tests. It shows which test killed which mutant.    
-There are several ways to use it:
-* with a collection of classes, assuming the associated test classes have the same names with the suffix “Test”:
-    ```smalltalk
-    matrix := MTMatrix forClasses: { AClass1 . AClass2 }
-    ```
-* with a collection of classes and a collection of test classes:
-    ```smalltalk
-    matrix := MTMatrix forClasses: { AClass1 . AClass2 } andTests: { ATestClass1 . ATestClass2 . ATestClass3 }
-    ```
-* with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”:
-    ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 }
-    ```
-* with a collection of packages and a collection of test packages:
-    ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
-    ```
-
-Once created, the matrix must be constructed with:
-```smalltalk
-matrix build
-```  
-To build itself, the matrix ran a mutation testing analysis with the data provided.  
-The matrix can be displayed as follows:
-```smalltalk
-matrix generateMatrix
-```
-
-Here is the top of a matrix built on the class `UUID`:
-
-![Matrix of UUID](./figures/Matrix.png)
-
-The rows are the mutants, and the columns the tests. A blue box means the mutant is killed by the test.
-
-A heatmap can also be generated. It groups mutants by mutation operators and tests by class.  
-The heatmap can be displayed as follows:
-```smalltalk
-matrix generateHeatmap
-```
-
-This is the top of an heatmap built also on `UUID`:
-![Heatmap of UUID](./figures/Heatmap.png)
-
-It is now possible to obtain several pieces of information:
-
-##### Trivial mutants
-Trivial mutants are mutants killed by all tests:
-```smalltalk
-matrix trivialMutants inspect
-```
-Since these mutants are killed by all tests, we can assume that the real errors they represent will always be detected in real-life situations. This means that these mutants may not be necessary for the data provided.
-
-##### Equivalent mutants
-Equivalent mutants are mutants that are killed by the same tests:
-```smalltalk
-matrix equivalentMutants inspect
-```
-This gives several groups of mutants, each containing mutants that are equivalent to each other.  
-If 2 mutants are equivalent, this may mean that, from the point of view of the tests, they are redundant. In other words, they have the same “profile” with regard to the tests, so one of them can be eliminated.
-
-##### Included mutants
-A mutant A is included in a mutant B if it is killed by a subset of the test set that kills B. In other words, if B is killed by tests 1, 2 and 3, and A is killed by tests 1 and 3, then A is included in B. To get them:
-```smalltalk
-matrix includedMutants inspect
-```
-A dictionary is returned where the keys are each mutant and the values are the mutants included in the key mutant.  
-If one mutant is included in another, we can also say here that there is redundancy and that it's better to keep the “bigger” mutant (in the sense of “killed by a greater number of tests”).
-
-#### Mutation operator analysis 
-
-Mutation operator analysis is used to find out how many mutants the Mutalk mutation operator set produces on given classes or packages. In other words, you can find out which operators produce at least a certain number of mutants, and which produce at most a certain number of mutants.  
-To use it:
-```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyClass1 . MyClass2 }
-```
-or
-```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
-```
-and then:
-```smalltalk
-operatorAnalysis operatorsProducingAtMost: 2
-```
-and:
-```smalltalk
-operatorAnalysis operatorsProducingAtLeast: 10
-```
-
-TODO: Example
-
-#### Non-mutated methods
-
-The analysis of non-mutated methods allows you to find methods on which MuTalk has been unable to apply mutations, i.e. methods whose body contains no code corresponding to the application domains of the mutation operators.  
-This analysis also applies to classes or packages:
-```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forClasses: { MyClass1 . MyClass2 }
-```
-or
-```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
-```
-Finally, to have the methods without mutation:
-```smalltalk
-analysis methodsWithoutMutation inspect
-```
+### Analysis options in MuTalk
+MuTalk offers several options for configuring the analysis and good default values. They allow to select which kind of mutation to apply, which methods to mutate, allocating budgets for the analysis, filtering the tests to use and logging. This sections goes into details about each of those options. If you are not interested in the details of these options, you can skip ahead to the next section on [exploring the results](#exploring-the-results)
 
 
-### The different options in MuTalk
-MuTalk offers several options for configuring the analysis.  
-**Note:** In the following, if nothing is specified regarding the use of the objects mentioned, simply create the object with `new`. If you need to specify an additional parameter when creating the object, this will be indicated.
+**Note:** In the following section, if nothing is specified regarding the use of the objects mentioned, simply create the object with `new`. If you need to specify an additional parameter when creating the object, this will be indicated.
 
 #### Choosing the type of mutations
 
@@ -522,26 +387,144 @@ myLogger := MTFileLogger toFileNamed: 'log.txt
 This logger writes the trace in the Pharo's Transcript.
 
 
-### Specific cases
 
-#### UUID : A singleton case
 
-In the case where one of the classes used for the mutation testing analysis is a singleton, there are some things to consider.  
-Since there is only one instance of this class, when applying the first mutation the singleton might turn into a mutated state.  
-But even after uninstalling the mutation, the singleton will likely stay in that mutated state because it is still the same instance.  
-The same thing will occur with the following mutations, and the singleton will eventually carry more and more mutations throughout the whole analysis.  
-The singleton having so many mutations will propably lead to misleading results, causing tests to fail while they shouldn't.
+### Exploring the results
 
-In order to counter this phenomenom, one can add a tear down to the test classes that call this singleton to manually regenerate it to a "healthy" state at the end of each test.
+MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
 
-For example, this is how it is done for `UUID`:
+#### Example of Analysis
+
+Here is an example of mutation testing analysis with provided example classes. Let's look at the results.
 ```smalltalk
-tearDown
-
-    UUIDGenerator startUp
+analysis := MTAnalysis new
+	            classesToMutate: { MyVehicle };
+	            testClasses: { MyVehicleTest }.
+analysis run.
+analysis generalResult inspect
 ```
 
-This will ensure that the `UUID` singleton will carry one mutation at a time, returning to a base state before moving on to the next mutation.
+#### The result object
+
+This is the inspector on the `generalResult` object of the analysis. There are a few things to note here:
+* It contains 4 more tabs than the usual inspector that are specific to the mutation analysis: TODO sublist
+    - The `Surviving Mutants` tab lists all the mutants that survived.
+    - The `Killed Mutants` tab lists all the mutants that were killed.
+    - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
+    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
+* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Diffeerences are highlighted in green and red.
+* The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
+
+![Inspector on generalResult, showing the "Killed mutants" tab. The "Surviving mutants" and "Terminated mutants" tabs look the same. Under the tab there is the list of mutants with their full name. Under this there is a comparison between the original method and the mutant. At the bottom there is the usual inspector playground.](./figures/Inspector.png) (TODO excluded tests)
+
+#### Mutation matrix: a visual representation
+
+The mutation matrix is a matrix representing the results of mutant tests. It shows which test killed which mutant.    
+There are several ways to use it:
+* with a collection of classes, assuming the associated test classes have the same names with the suffix “Test”:
+    ```smalltalk
+    matrix := MTMatrix forClasses: { AClass1 . AClass2 }
+    ```
+* with a collection of classes and a collection of test classes:
+    ```smalltalk
+    matrix := MTMatrix forClasses: { AClass1 . AClass2 } andTests: { ATestClass1 . ATestClass2 . ATestClass3 }
+    ```
+* with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”:
+    ```smalltalk
+    matrix := MTMatrix forPackages: { APackage1 . APackage2 }
+    ```
+* with a collection of packages and a collection of test packages:
+    ```smalltalk
+    matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
+    ```
+
+Once created, the matrix must be constructed with:
+```smalltalk
+matrix build
+```  
+To build itself, the matrix ran a mutation testing analysis with the data provided.  
+The matrix can be displayed as follows:
+```smalltalk
+matrix generateMatrix
+```
+
+Here is the top of a matrix built on the class `UUID`:
+
+![Matrix of UUID](./figures/Matrix.png)
+
+The rows are the mutants, and the columns the tests. A blue box means the mutant is killed by the test.
+
+A heatmap can also be generated. It groups mutants by mutation operators and tests by class.  
+The heatmap can be displayed as follows:
+```smalltalk
+matrix generateHeatmap
+```
+
+This is the top of an heatmap built also on `UUID`:
+![Heatmap of UUID](./figures/Heatmap.png)
+
+It is now possible to obtain several pieces of information:
+
+##### Trivial mutants
+Trivial mutants are mutants killed by all tests:
+```smalltalk
+matrix trivialMutants inspect
+```
+Since these mutants are killed by all tests, we can assume that the real errors they represent will always be detected in real-life situations. This means that these mutants may not be necessary for the data provided.
+
+##### Equivalent mutants
+Equivalent mutants are mutants that are killed by the same tests:
+```smalltalk
+matrix equivalentMutants inspect
+```
+This gives several groups of mutants, each containing mutants that are equivalent to each other.  
+If 2 mutants are equivalent, this may mean that, from the point of view of the tests, they are redundant. In other words, they have the same “profile” with regard to the tests, so one of them can be eliminated.
+
+##### Included mutants
+A mutant A is included in a mutant B if it is killed by a subset of the test set that kills B. In other words, if B is killed by tests 1, 2 and 3, and A is killed by tests 1 and 3, then A is included in B. To get them:
+```smalltalk
+matrix includedMutants inspect
+```
+A dictionary is returned where the keys are each mutant and the values are the mutants included in the key mutant.  
+If one mutant is included in another, we can also say here that there is redundancy and that it's better to keep the “bigger” mutant (in the sense of “killed by a greater number of tests”).
+
+#### Mutation operator analysis 
+
+Mutation operator analysis is used to find out how many mutants the Mutalk mutation operator set produces on given classes or packages. In other words, you can find out which operators produce at least a certain number of mutants, and which produce at most a certain number of mutants.  
+To use it:
+```smalltalk
+operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyClass1 . MyClass2 }
+```
+or
+```smalltalk
+operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+```
+and then:
+```smalltalk
+operatorAnalysis operatorsProducingAtMost: 2
+```
+and:
+```smalltalk
+operatorAnalysis operatorsProducingAtLeast: 10
+```
+
+TODO: Example
+
+#### Non-mutated methods
+
+The analysis of non-mutated methods allows you to find methods on which MuTalk has been unable to apply mutations, i.e. methods whose body contains no code corresponding to the application domains of the mutation operators.  
+This analysis also applies to classes or packages:
+```smalltalk
+analysis := MTNonMutatedMethodsAnalysis forClasses: { MyClass1 . MyClass2 }
+```
+or
+```smalltalk
+analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+```
+Finally, to have the methods without mutation:
+```smalltalk
+analysis methodsWithoutMutation inspect
+```
 
 #### Handling core classes 
 
