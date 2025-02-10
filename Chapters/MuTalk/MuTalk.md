@@ -391,7 +391,8 @@ This logger writes the trace in the Pharo's Transcript.
 
 ### Exploring the results
 
-MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
+Once an analysis is run, we obtain a `MTGeneralResult` objects which comes with its specific inspector pannels. MuTalk also includes tools which use the results of a mutation testing analysis to extract data.
+In this section we go over how to understand the results of the analysis.
 
 #### Example of Analysis
 
@@ -406,20 +407,24 @@ analysis generalResult inspect
 
 #### The result object
 
-This is the inspector on the `generalResult` object of the analysis. There are a few things to note here:
-* It contains 4 more tabs than the usual inspector that are specific to the mutation analysis: TODO sublist
+![Inspector on generalResult, showing the "Killed mutants" tab. The "Surviving mutants" and "Terminated mutants" tabs look the same. Under the tab there is the list of mutants with their full name. Under this there is a comparison between the original method and the mutant. At the bottom there is the usual inspector playground.](./figures/Inspector.png)
+
+This is the inspector on the result object of the analysis. From top to bottom :
+* The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
+* The inspector contains 4 more tabs than the usual inspector that are specific to the mutation analysis:
     - The `Surviving Mutants` tab lists all the mutants that survived.
     - The `Killed Mutants` tab lists all the mutants that were killed.
     - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
     - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
-* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Diffeerences are highlighted in green and red.
-* The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
+* For the mutants tabs, the inspector displays a list of mutants with their names. This includes the type of mutation applied, and the mutated class and method (Ex: `Increase a literal integer in MyVehicle class>>#newSimpleCar`). When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Differences are highlighted in green and red. On the image below, we can see that a number was decreased by the mutation from 4 to 3.
 
-![Inspector on generalResult, showing the "Killed mutants" tab. The "Surviving mutants" and "Terminated mutants" tabs look the same. Under the tab there is the list of mutants with their full name. Under this there is a comparison between the original method and the mutant. At the bottom there is the usual inspector playground.](./figures/Inspector.png) (TODO excluded tests)
+By looking at the first tab on surviving mutants, one can see which cases should be targeted by new tests to improve the tests suite.
+
 
 #### Mutation matrix: a visual representation
 
-The mutation matrix is a matrix representing the results of mutant tests. It shows which test killed which mutant.    
+The mutation matrix is a matrix representing the results of mutant tests. It shows exactly which test killed which mutant. This can be useful for further analysis of the test suite.
+
 There are several ways to use it:
 * with a collection of classes, assuming the associated test classes have the same names with the suffix “Test”:
     ```smalltalk
@@ -438,30 +443,34 @@ There are several ways to use it:
     matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
     ```
 
-Once created, the matrix must be constructed with:
+Once created, the matrix must be constructed with `build` to ran the corresponding mutation analysis. Then it can be displayed with `generateMatrix`. Here is the snippet to analyse `MyVehicle` example class :
+
 ```smalltalk
-matrix build
-```  
-To build itself, the matrix ran a mutation testing analysis with the data provided.  
-The matrix can be displayed as follows:
-```smalltalk
-matrix generateMatrix
+matrix := MTMatrix forClasses: { MyVehicle }.
+matrix build.
+matrix generateMatrix.
 ```
+Here is the first few lines of a matrix built from the analysis of `MyVehicle`:
 
-Here is the top of a matrix built on the class `UUID`:
-
-![Matrix of UUID](./figures/Matrix.png)
+![Matrix of MyVehicle](./figures/MyVehicleMatrixCropped.pdf)
 
 The rows are the mutants, and the columns the tests. A blue box means the mutant is killed by the test.
+In this matrix, the mutation that increased a literal integer in MyVehicle>>#hasFourWheels has been killed by both #testHasFourWheels and #testSimpleCarHasFourWheels. 
 
-A heatmap can also be generated. It groups mutants by mutation operators and tests by class.  
+
+A heatmap can also be generated. It groups mutants by mutation operators and tests by class to summarise the data.  
 The heatmap can be displayed as follows:
 ```smalltalk
 matrix generateHeatmap
 ```
 
-This is the top of an heatmap built also on `UUID`:
-![Heatmap of UUID](./figures/Heatmap.png)
+This is the heatmap built also on `MyVehicle` that groups by test class and types of mutations :
+![Heatmap of MyVehicle](./figures/MyVehicleHeatmapCropped.pdf)
+Here the number in each cell is the percentage of tests in the test class that killed the 
+
+TODO ....
+
+
 
 It is now possible to obtain several pieces of information:
 
