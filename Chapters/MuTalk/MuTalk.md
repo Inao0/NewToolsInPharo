@@ -8,7 +8,7 @@ Through this chapter we will discuss :
 - 1. Introduction to Mutation Testing
 - 2. How to use MuTalk / Quick Start
 - 3. Available options in MuTalk
-- 4. Mutation analysis : variants on mutation testing
+- 4. Mutation analysis : variants on mutation testing (TO CHECK)
 
 ### Introduction to Mutation Testing
 
@@ -36,7 +36,7 @@ hasFourWheels:
 ^ self numberOfWheels = 4
 ```
 
-Two examples of mutations are changing the number of wheel and changing the comparison sign. This could result in the following mutants :
+Two different examples of mutations are changing the number of wheels and changing the comparison sign. This could result in the following mutants :
 
 - Decreasing a "4" into a "3"
 ```smalltalk
@@ -60,16 +60,15 @@ testHasFourWheels
  aVehicle := MyVehicle newWithWheels: 4.
  self assert: aVehicle hasFourWheels
 ```
-
-The mutant on the number of wheels will result in this test failing. This mutant has been killed.
+Mutants are introduced one at a time. The mutant on the number of wheels will result in this test failing. This mutant has been killed.
 The mutant on the comparison sign will pass the test. This mutant has survived.
 
 
 #### The Mutation Score : a Test Suite Metric.
 
-The ideal case for a test suite is to kill all mutants, as the tests are designed to detect errors in the code. If mutants are not killed, this means that if a real error is introduced into the project's source code during a development phase, it may not be detected before deployment and cause bugs later on.
+The ideal case for a test suite is to kill all mutants, as the tests are designed to detect errors in the code. If mutants survive, this means that if a real error is introduced into the project's source code during a development phase, it may not be detected before deployment and cause bugs later on.
 
-The number of mutants killed is summarized with a mutation score, defined as:
+The percentage of mutants killed is summarized with a mutation score, defined as:
 
 $$ %label=mutationScore
 Mutation\:score = \frac{Number\:of\:killed\:mutants}{Total\:number\:of\:mutants}
@@ -82,8 +81,8 @@ MuTalk is Pharo's mutation testing library. It can be found on [GitHub](https://
 
 #### The 4 steps of MuTalk Analysis
 
-The mutation testing analysis of MuTalk works with two main elements: the source code to mutate and the tests that go with it.  
-With those, the analysis then goes through 4 phases:
+MuTalk mutation testing analysis works with two main elements: the source code to mutate and the tests that go with it.  
+Once those are provided, the analysis then goes through 4 phases:
 * [An initial test run](#Initial-test-run)
 * [A coverage analysis](#Coverage-analysis)
 * [The generation of mutants](#Mutant-generation)
@@ -154,7 +153,7 @@ MuTalk also includes tools which use the results of a mutation testing analysis 
 
 #### Example of Analysis
 
-Here is an example of mutation testing analysis. Let's look at the results.
+Here is an example of mutation testing analysis with provided example classes. Let's look at the results.
 ```smalltalk
 analysis := MTAnalysis new
 	            classesToMutate: { MyVehicle };
@@ -171,7 +170,7 @@ This is the inspector on the `generalResult` object of the analysis. There are a
     - The `Killed Mutants` tab lists all the mutants that were killed.
     - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
     - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
-* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right.
+* For the mutants tabs, the inspector displays a list of mutants with their names. When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Diffeerences are highlighted in green and red.
 * The numbers of mutants evaluated, killed, surviving and terminated are displayed at the top of the window.
 
 ![Inspector on generalResult, showing the "Killed mutants" tab. The "Surviving mutants" and "Terminated mutants" tabs look the same. Under the tab there is the list of mutants with their full name. Under this there is a comparison between the original method and the mutant. At the bottom there is the usual inspector playground.](./figures/Inspector.png) (TODO excluded tests)
@@ -197,7 +196,7 @@ There are several ways to use it:
     matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
     ```
 
-Once created, the matrix must be constructed:
+Once created, the matrix must be constructed with:
 ```smalltalk
 matrix build
 ```  
@@ -267,6 +266,8 @@ and:
 operatorAnalysis operatorsProducingAtLeast: 10
 ```
 
+TODO: Example
+
 #### Non-mutated methods
 
 The analysis of non-mutated methods allows you to find methods on which MuTalk has been unable to apply mutations, i.e. methods whose body contains no code corresponding to the application domains of the mutation operators.  
@@ -280,7 +281,7 @@ analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage
 ```
 Finally, to have the methods without mutation:
 ```smalltalk
-analysis findMethodsWithoutMutation inspect
+analysis methodsWithoutMutation inspect
 ```
 
 
@@ -365,13 +366,12 @@ There are a lot of operators, available by default in MuTalk. *@tabAllOperators@
 
 #### Selection of methods to be mutated
 
-Mutant generation strategies are ways of choosing which methods will be mutated. They are tagged *Mutant generation strategies* in MuTalk and are used as follows:
+Mutant generation strategies are ways of choosing which methods will be mutated. Each strategy is implemented as a subclass of TODO. They are tagged *Mutant generation strategies* in MuTalk and are used as follows:
 ```smalltalk
 analysis mutantGenerationStrategy: myMutantGenerationStrategy
 ```
 ##### `MTAllMutantGenerationStrategy`  
 The default strategy is to mutate all methods of the provided classes.
-
 ##### `MTSelectingFromCoverageMutantGenerationStrategy`  
 Another strategy is to mutate only those methods that are covered by tests, again to save execution time.
 
@@ -412,7 +412,7 @@ myBudget := MTPercentageOfMutantsBudget for: 50
 What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
 
 For example, this is a graph of mutation score as a function of the percentage of mutants evaluated.
-![](./figures/Score%20percent%20graph.png) (recadrer + légende)
+![](./figures/Score%20percent%20graph.png) ( TODO recadrer + légende)
 For each percent, an analysis was run 10 times with a simple random mutant selection strategy, and the mutation score of each analysis was computed. Then a boxplot was drawn with those 10 scores. 
 
 It shows that even though there is a greater variance the lower the percentage is, the median is still relatively close to the mutation score at 100%.
