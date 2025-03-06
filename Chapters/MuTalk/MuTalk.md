@@ -134,13 +134,13 @@ analysis := MTAnalysis new.
 In order to function, MuTalk needs the classes or packages to be mutated, as well as the tests that go with them, because as said earlier, mutation testing's purpose is to test tests.  
 To give a list of classes:
 ```smalltalk
-analysis classesToMutate: { MyClass1 . MyClass2 }.
-analysis testClasses: { MyTestClass1 . MyTestClass2 }.
+analysis classesToMutate: { MyVehicle }.
+analysis testClasses: { MyVehicleTest }.
 ```
 or to give a list of packages:
 ```smalltalk
-analysis packagesToMutate: { MyPackage1 . MyPackage2 }.
-analysis testPackages: { MyTestPackage1 . MyTestPackage2 }.
+analysis packagesToMutate: { 'MuTalk-Examples' }.
+analysis testPackages: { 'MuTalk-Examples-Tests' }.
 ```
 MuTalk also has a number of configurable options, but these have default values. So you can run the analysis as it is and get the results:
 ```smalltalk
@@ -157,12 +157,12 @@ MuTalk offers several options for configuring the analysis and good default valu
 
 #### Choosing the type of mutations
 
-Mutation operators are objects that define a type of mutation and how to perform it. For example, there's a mutation operator that changes a `+` into a `-`. In MuTalk, they all have an *Operators* tag and are subclasses of `MTAbstractMutantOperator`. By default, they are all used, but if you want to use only some of them, proceed as follows:
+Mutation operators are objects that define a type of mutation and how to perform it. For example, there's a mutation operator that changes a `+` into a `-`. In MuTalk, they all have an *Operators* tag and are subclasses of `MTAbstractMutantOperator`. By default, they are all used, but if you want to use only some of them, proceed as follows *(don't forget to give actual instances of operators, not just the class)*:
 ```smalltalk
-analysis operators: { operator1 . operator2 . operator3 }
+analysis operators: { MTRemoveCaretOperator new. MTReplaceDivisionWithMultiplicationMutantOperator new. MTReplaceIfFalseReceiverWithTrueOperator new }
 ``` 
 
-There are a lot of operators, available by default in MuTalk. The table below provides a list. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.TODO
+There are a lot of operators, available by default in MuTalk. The table below provides a list of what the current operators do. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.TODO
 
 %TODO fix ?
 
@@ -223,7 +223,7 @@ There are a lot of operators, available by default in MuTalk. The table below pr
 
 #### Selection of methods to be mutated
 
-Mutant generation strategies are ways of choosing which methods will be mutated. Each strategy is implemented as a subclass of TODO. They are tagged *Mutant generation strategies* in MuTalk and are used as follows:
+Mutant generation strategies are ways of choosing which methods will be mutated. Each strategy is implemented as a subclass of `MTMutantGenerationStrategy`. They are tagged *Mutant generation strategies* in the package `MuTalk-Model` and are used as follows:  
 ```smalltalk
 analysis mutantGenerationStrategy: myMutantGenerationStrategy
 ```
@@ -236,7 +236,7 @@ Another strategy is to mutate only those methods that are covered by tests, agai
 This strategy is based on manual selection of the methods to be mutated, i.e. providing the mutant selection strategy with a collection of methods. The mutations will then be applied to these methods and not to those given at analysis creation.  
 To use this strategy:
 ```smalltalk
-myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new targetMethods: { method1 . method2 }
+myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new targetMethods: { MyVehicle>>#numberOfWheels: . MyVehicle>>#hasFourWheels }
 ```
 
 
@@ -269,16 +269,17 @@ myBudget := MTPercentageOfMutantsBudget for: 50
 What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
 
 For example, this is a graph of mutation score as a function of the percentage of mutants evaluated.
-![](./figures/Score%20percent%20graph.png) ( TODO recadrer + légende)
+![Boxplots representing the mutation score distribution for each percentage of mutants evaluated over the total number of mutants available. Each box was created by running a mutation analysis 10 times with each percentage](./figures/Score%20percent%20graph.png) ( TODO recadrer + légende)
 For each percent, an analysis was run 10 times with a simple random mutant selection strategy, and the mutation score of each analysis was computed. Then a boxplot was drawn with those 10 scores. 
 
 It shows that even though there is a greater variance the lower the percentage is, the median is still relatively close to the mutation score at 100%.
 
 #### Selection of mutants to be evaluated for budgeted analysis
 
-When running an analysis with a budget (*@budgets@*), not all mutants can be evaluated. Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
+When running an analysis with a budget (*@budgets@*), not all mutants can be evaluated. In this context it is important to think about which mutants will be chosen for the analysis, and not to lose too much information. Even though there is no way to measure the value of a mutant in an analysis yet in MuTalk, a basic asumption is that it is important to have diversity.  
+Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
 ```smalltalk
-analysis mutantGenerationStrategy mutantSelectionStrategy: myMutantSelectionStrategy
+analysis mutantSelectionStrategy: myMutantSelectionStrategy
 ```
 
 ##### `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`  
@@ -286,8 +287,11 @@ These strategies shuffle mutants randomly, but in a particular way. They respect
 These strategies are particularly useful when reducing the number of mutants analyzed with budgets (*@budgets@*). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
 
 ![Process of specific random selections](./figures/Random2.png)
-![Mutant repartition with basic random selection %width=50](./figures/Distrib.png)
-![Mutant repartition with random operator selection %width=50](./figures/Distrib%202.png)
+Let's say there are four operators: A, B, C and D, and they each produce some mutants. A produces half of the total mutants, D produces very few of them, while B and C produce the rest. For the purpose of the example we will consider that all the operators still generate a lot of mutants, just that the representation in the total number of generated mutants are different.  
+With a mutant selection that chooses randomly and without any bias a mutant for the analysis, the final selection would look like this:
+![Expected mutant distribution among 4 operators with basic random selection. This distribution in fact matches the actual distribution %width=50](./figures/Distrib.png)  
+Here, A is overrepresented in the final results, while D is barely present. However an operator is not necessary less meaningful in the analysis because 
+![Expected mutant distribution among 4 operators with random operator selection (if there are enough mutants for each operator to select the same amount for each of them) %width=50](./figures/Distrib%202.png)
 
 In this example, a random operator selection strategy ensures that operator D is almost certainly represented in the results, which is not guaranteed with conventional random selection. 
 
@@ -327,14 +331,14 @@ myTestFilter := MTBlockTestFilter for: [ :testCase | testCase selector endsWith:
 This filter uses Pharo's pragmas as a condition for filtering tests. It only keeps tests that contain a given pragma.  
 To use this filter:
 ```smalltalk
-myTestFilter := MTPragmaSelectionTestFilter for: aPragma
+myTestFilter := MTPragmaSelectionTestFilter for: #aPragma
 ```
 
 ##### `MTPragmaRejectionTestFilter`  
 This filter works similarly to the previous one, but instead it blocks tests that contain the given pragma.  
 To use it:
 ```smalltalk
-myTestFilter := MTPragmaRejectionTestFilter for: aPragma
+myTestFilter := MTPragmaRejectionTestFilter for: #aPragma
 ```
 
 ##### `MTRedTestFilter`
@@ -380,7 +384,7 @@ This logger logs nothing.
 This logger writes the trace to a file whose name must be given. The logger will create the file.  
 To use it:
 ```smalltalk
-myLogger := MTFileLogger toFileNamed: 'log.txt
+myLogger := MTFileLogger toFileNamed: 'log.txt'
 ```
 
 ##### `MTTranscriptLogger`  
@@ -412,6 +416,7 @@ Here is an example of mutation testing analysis with provided example classes. L
 analysis := MTAnalysis new
 	            classesToMutate: { MyVehicle };
 	            testClasses: { MyVehicleTest }.
+"parametrization goes here"
 analysis run.
 analysis generalResult inspect
 ```
@@ -439,19 +444,19 @@ The mutation matrix is a matrix representing the results of mutant tests. It sho
 There are several ways to use it:
 * with a collection of classes, assuming the associated test classes have the same names with the suffix “Test”:
     ```smalltalk
-    matrix := MTMatrix forClasses: { AClass1 . AClass2 }
+    matrix := MTMatrix forClasses: { MyVehicle }
     ```
 * with a collection of classes and a collection of test classes:
     ```smalltalk
-    matrix := MTMatrix forClasses: { AClass1 . AClass2 } andTests: { ATestClass1 . ATestClass2 . ATestClass3 }
+    matrix := MTMatrix forClasses: { MyVehicle } andTests: { MyVehicleTest }
     ```
 * with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”:
     ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 }
+    matrix := MTMatrix forPackages: { 'MuTalk-Examples' }
     ```
 * with a collection of packages and a collection of test packages:
     ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
+    matrix := MTMatrix forPackages: { 'MuTalk-Examples' } andTestPackages: { 'MuTalk-Examples-Tests' }
     ```
 
 Once created, the matrix must be constructed with `build` to ran the corresponding mutation analysis. Then it can be displayed with `generateMatrix`. Here is the snippet to analyse `MyVehicle` example class :
@@ -476,11 +481,8 @@ matrix generateHeatmap
 ```
 
 This is the heatmap built also on `MyVehicle` that groups by test class and types of mutations :
-![Heatmap of MyVehicle](./figures/MyVehicleHeatmapCropped.pdf)
-Here the number in each cell is the percentage of tests in the test class that killed the 
-
-TODO ....
-
+![Heatmap of MyVehicle](./figures/MyVehicleHeatmapCropped.pdf)  
+Here the number in each cell is the percentage of tests in the test class that killed the mutants of each type of mutant operators used in the analysis.
 
 
 It is now possible to obtain several pieces of information:
@@ -513,11 +515,11 @@ If one mutant is included in another, we can also say here that there is redunda
 Mutation operator analysis is used to find out how many mutants the Mutalk mutation operator set produces on given classes or packages. In other words, you can find out which operators produce at least a certain number of mutants, and which produce at most a certain number of mutants.  
 To use it:
 ```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyClass1 . MyClass2 }
+operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyVehicle }
 ```
-or
+or:
 ```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MuTalk-Examples' }
 ```
 and then:
 ```smalltalk
@@ -535,11 +537,11 @@ TODO: Example
 The analysis of non-mutated methods allows you to find methods on which MuTalk has been unable to apply mutations, i.e. methods whose body contains no code corresponding to the application domains of the mutation operators.  
 This analysis also applies to classes or packages:
 ```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forClasses: { MyClass1 . MyClass2 }
+analysis := MTNonMutatedMethodsAnalysis forClasses: { MyVehicle }
 ```
-or
+or:
 ```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MuTalk-Examples' }
 ```
 Finally, to have the methods without mutation:
 ```smalltalk
