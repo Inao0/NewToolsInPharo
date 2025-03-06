@@ -388,6 +388,17 @@ This logger writes the trace in the Pharo's Transcript.
 
 
 
+### Handling core classes
+
+Mutation testing requires modifying the classes under analysis. This is fine when we are studying an application with its own specific classes. However, once we want to analyse classes that are part of the core of the Pharo system, it gets more complicated. Imagine introducing a bug into the UI of all windows with a mutation. Or into the definition of `Object` or `Class`. Those mutation can crash your Pharo instance.
+
+To be able to run mutation testing on such classes, we need to create a copy of it that can be modified without it impacting the system. Fortunately, Pharo comes with a tools to help you copy package and identify dependencies.
+
+In this section, we will go over how to run a mutation on analysis on ...
+
+
+
+
 
 ### Exploring the results
 
@@ -535,7 +546,6 @@ Finally, to have the methods without mutation:
 analysis methodsWithoutMutation inspect
 ```
 
-#### Handling core classes 
 
 
 ### Mutation Analysis - Variations on Mutation Testing
