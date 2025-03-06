@@ -137,10 +137,10 @@ To give a list of classes:
 analysis classesToMutate: { MyVehicle }.
 analysis testClasses: { MyVehicleTest }.
 ```
-or to give a list of packages: #TODO package MyVehicle ?
+or to give a list of packages:
 ```smalltalk
-analysis packagesToMutate: { MyPackage1 . MyPackage2 }.
-analysis testPackages: { MyTestPackage1 . MyTestPackage2 }.
+analysis packagesToMutate: { 'MuTalk-Examples' }.
+analysis testPackages: { 'MuTalk-Examples-Tests' }.
 ```
 MuTalk also has a number of configurable options, but these have default values. So you can run the analysis as it is and get the results:
 ```smalltalk
@@ -439,13 +439,13 @@ There are several ways to use it:
     ```smalltalk
     matrix := MTMatrix forClasses: { MyVehicle } andTests: { MyVehicleTest }
     ```
-* with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”: #TODO package MyVehicle ?
+* with a collection of packages, assuming that the associated test packages have the same names with the suffix “-Tests”:
     ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 }
+    matrix := MTMatrix forPackages: { 'MuTalk-Examples' }
     ```
 * with a collection of packages and a collection of test packages:
     ```smalltalk
-    matrix := MTMatrix forPackages: { APackage1 . APackage2 } andTestPackages: { ATestPackage1 . ATestPackage2 }
+    matrix := MTMatrix forPackages: { 'MuTalk-Examples' } andTestPackages: { 'MuTalk-Examples-Tests' }
     ```
 
 Once created, the matrix must be constructed with `build` to ran the corresponding mutation analysis. Then it can be displayed with `generateMatrix`. Here is the snippet to analyse `MyVehicle` example class :
@@ -506,9 +506,9 @@ To use it:
 ```smalltalk
 operatorAnalysis := MTMutantOperatorAnalysis forClasses: { MyVehicle }
 ```
-or #TODO package MyVehicle ?
+or:
 ```smalltalk
-operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+operatorAnalysis := MTMutantOperatorAnalysis forPackages: { 'MuTalk-Examples' }
 ```
 and then:
 ```smalltalk
@@ -528,9 +528,9 @@ This analysis also applies to classes or packages:
 ```smalltalk
 analysis := MTNonMutatedMethodsAnalysis forClasses: { MyVehicle }
 ```
-or #TODO package MyVehicle ?
+or:
 ```smalltalk
-analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MyPackage1' . 'MyPackage2' }
+analysis := MTNonMutatedMethodsAnalysis forPackages: { 'MuTalk-Examples' }
 ```
 Finally, to have the methods without mutation:
 ```smalltalk
