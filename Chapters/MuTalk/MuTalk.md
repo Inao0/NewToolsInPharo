@@ -162,7 +162,7 @@ Mutation operators are objects that define a type of mutation and how to perform
 analysis operators: { MTRemoveCaretOperator new. MTReplaceDivisionWithMultiplicationMutantOperator new. MTReplaceIfFalseReceiverWithTrueOperator new }
 ``` 
 
-There are a lot of operators, available by default in MuTalk. The table below provides a list of what the current operators do. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.TODO
+There are a lot of operators, available by default in MuTalk. The table below provides a list of what the current operators do. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.
 
 %TODO fix ?
 
@@ -420,13 +420,14 @@ We can now run a mutation analysis on our duplicated version of `Colors`:
 analysis := MTAnalysis new.
 analysis classesToMutate: { MyColor }.
 analysis testClasses: { MyColorTest }.
+analysis run.
 analysis generalResult inspect
 ```
 TODO test code above with latest version
 
 
 
-However even those tools have some limits. For example implicit references such as pseudo variable or creating objects with literals won't be caught. For example, most tests for booleans use the `true` and `false` pseudo variables. These make the reference to the Boolean class implicit, and it won't be rewritten to point to the new class boolean class when duplicating those. Using a literal notation in tests such as `#( 1 2 7)` won't be rewritten when trying to duplicate `Array` for mutation testing. Finally some syntactic sugar such as sending a message to a first class to create an instance of a second one also blinds the rewritting during duplication. When duplicating `Point` and its tests, test using the `@` message to create points (ex: 1@6 creates a point where x is 1 and y is 6) are not rewritten.*
+However even those tools have some limits. For example implicit references such as pseudo variable or creating objects with literals won't be caught. For example, most tests for booleans use the `true` and `false` pseudo variables. These make the reference to the Boolean class implicit, and it won't be rewritten to point to the new class boolean class when duplicating those. Using a literal notation in tests such as `#( 1 2 7)` won't be rewritten when trying to duplicate `Array` for mutation testing. Finally some syntactic sugar such as sending a message to a first class to create an instance of a second one also blinds the rewritting during duplication. When duplicating `Point` and its tests, test using the `@` message to create points (ex: 1@6 creates a point where x is 1 and y is 6) are not rewritten.
 
 Studying such core classes requires more work to create an accurate copy before running the mutation analysis on it.
 
@@ -575,10 +576,11 @@ Finally, to have the methods without mutation:
 analysis methodsWithoutMutation inspect
 ```
 
+### Conclusion
+
+In this chapter we presented Mutalk, a mutation analysis framework. We explained the principle of mutation testing and its original goal, evaluating a test suite. We provided examples and documentation on how to run such an analysis and how to parameterize it. We presented the default mutations and the way one can optimize its run time with budgets, especially for use cases such as continuous integration.
+
+However, the use of this framework is not limited to mutation testing. Mutation analysis is using the mutation testing principle of modifying the code a little, running the tests and collecting the results. However mutation analysis can study other topic than the quality of the test suite. Assuming the test suite is good enough, one can use mutation analysis and custom mutation to study the use of reflection (TODO) or to test a refactoring framework for example (TODO)).
 
 
-### Mutation Analysis - Variations on Mutation Testing
 
-
-#### Ref au travail de Balsa
-#### Mutation analysis for reflection ?
