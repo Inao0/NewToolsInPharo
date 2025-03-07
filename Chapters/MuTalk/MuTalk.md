@@ -394,14 +394,41 @@ This logger writes the trace in the Pharo's Transcript.
 
 ### Handling core classes
 
-Mutation testing requires modifying the classes under analysis. This is fine when we are studying an application with its own specific classes. However, once we want to analyse classes that are part of the core of the Pharo system, it gets more complicated. Imagine introducing a bug into the UI of all windows with a mutation. Or into the definition of `Object` or `Class`. Those mutation can crash your Pharo instance.
+Mutation testing requires modifying the classes under analysis. This is fine when we are studying an application with its own specific classes. However, once we want to analyse classes that are part of the core of the Pharo system, it gets more complicated. Imagine introducing a bug into the UI of all windows with a mutation. Or into the definition of `Object` or `Class`. Those mutations can crash your Pharo instance.
 
-To be able to run mutation testing on such classes, we need to create a copy of it that can be modified without it impacting the system. Fortunately, Pharo comes with a tools to help you copy package and identify dependencies.
+One solution to be able to run mutation testing on such classes is to create a copy of those classes and their tests. This copy can be mutated without it impacting the stability of  the system. Pharo comes with a tools to help you copy package and identify dependencies : package duplication with regex for replacing class names and the `Dependencies browser`. The package duplication modify the classes in the copy to reference each other instead of referencing the original package. The dependencies browser allows one to check what are the remaining dependencies after the duplication.
 
-In this section, we will go over how to run a mutation on analysis on ...
+Let's take the exemple of `Color`, which is used for all the UI. For this example we will temporarily move the test class of `Color` into the `Colors` package. With them together, we can duplicate both at the same time, allowing the duplication to rewrite referenences to `Color` into the tests to `MyColor`, the duplicated version.
+
+![Duplicating the Colors package](/figures/ColorPackageDuplication.png)
+
+Using a regular expression, we copy all classes and we prefix their duplicated name with `My` to differentiate them. 
+
+![Renaming classes with a regex](/figures/RegexDuplication.png)
+
+Once the classes are duplicated, the `MyColor` class needs to be initialized. Once this is done, the 16 tests of `MyColorTest` are green. 
+
+![Initalising the MyColor Class](/figures/ColorClassInitialisation.png)
+
+At this point, we can check that we have no remaining dependencies to the original `Colors` package by right clicking the package name and chosing `Browse dependencies`. We can check in the picture below that in the left most column we do not see the `Colors` package. 
+
+![Dependencies browser for MyColors package](/figures/MyColorsDependenciesBrowser.png)
+
+We can now run a mutation analysis on our duplicated version of `Colors`:
+
+```Smalltalk
+analysis := MTAnalysis new.
+analysis classesToMutate: { MyColor }.
+analysis testClasses: { MyColorTest }.
+analysis generalResult inspect
+```
+TODO test code above with latest version
 
 
 
+However even those tools have some limits. For example implicit references such as pseudo variable or creating objects with literals won't be caught. For example, most tests for booleans use the `true` and `false` pseudo variables. These make the reference to the Boolean class implicit, and it won't be rewritten to point to the new class boolean class when duplicating those. Using a literal notation in tests such as `#( 1 2 7)` won't be rewritten when trying to duplicate `Array` for mutation testing. Finally some syntactic sugar such as sending a message to a first class to create an instance of a second one also blinds the rewritting during duplication. When duplicating `Point` and its tests, test using the `@` message to create points (ex: 1@6 creates a point where x is 1 and y is 6) are not rewritten.*
+
+Studying such core classes requires more work to create an accurate copy before running the mutation analysis on it.
 
 
 ### Exploring the results
