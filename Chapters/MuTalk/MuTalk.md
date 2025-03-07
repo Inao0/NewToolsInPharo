@@ -269,7 +269,7 @@ myBudget := MTPercentageOfMutantsBudget for: 50
 What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
 
 For example, this is a graph of mutation score as a function of the percentage of mutants evaluated.
-![Boxplots representing the mutation score distribution for each percentage of mutants evaluated over the total number of mutants available. Each box was created by running a mutation analysis 10 times with each percentage](./figures/Score%20percent%20graph.png) ( TODO recadrer + légende)
+![Boxplots representing the mutation score distribution for each percentage of mutants evaluated over the total number of mutants available. Each box was created by running a mutation analysis 10 times with each percentage](./figures/Score%20percent%20graph.png)
 For each percent, an analysis was run 10 times with a simple random mutant selection strategy, and the mutation score of each analysis was computed. Then a boxplot was drawn with those 10 scores. 
 
 It shows that even though there is a greater variance the lower the percentage is, the median is still relatively close to the mutation score at 100%.
@@ -303,6 +303,7 @@ This strategy consists simply in not mixing the list of mutants and returning it
 
 
 #### General test filters
+@testFilters
 
 Test filters allow you to block certain tests for the whole analysis according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
 ```smalltalk
@@ -458,7 +459,7 @@ This is the inspector on the result object of the analysis. From top to bottom :
     - The `Surviving Mutants` tab lists all the mutants that survived.
     - The `Killed Mutants` tab lists all the mutants that were killed.
     - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
-    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
+    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (*@testFilters@*) and why they were rejected.
 * For the mutants tabs, the inspector displays a list of mutants with their names. This includes the type of mutation applied, and the mutated class and method (Ex: `Increase a literal integer in MyVehicle class>>#newSimpleCar`). When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Differences are highlighted in green and red. On the image below, we can see that a number was decreased by the mutation from 4 to 3.
 
 By looking at the first tab on surviving mutants, one can see which cases should be targeted by new tests to improve the tests suite.
@@ -557,7 +558,7 @@ and:
 operatorAnalysis operatorsProducingAtLeast: 10
 ```
 
-TODO: Example
+![Results of a mutation operator analysis run on MyVehicle. Here are the operators that produced at least 3 mutants %width=75](./figures/Operator%20Analysis.png)
 
 #### Non-mutated methods
 
