@@ -401,19 +401,19 @@ One solution to be able to run mutation testing on such classes is to create a c
 
 Let's take the exemple of `Color`, which is used for all the UI. For this example we will temporarily move the test class of `Color` into the `Colors` package. With them together, we can duplicate both at the same time, allowing the duplication to rewrite referenences to `Color` into the tests to `MyColor`, the duplicated version.
 
-![Duplicating the Colors package](/figures/ColorPackageDuplication.png)
+![Duplicating the Colors package](./figures/ColorPackageDuplication.png)
 
 Using a regular expression, we copy all classes and we prefix their duplicated name with `My` to differentiate them. 
 
-![Renaming classes with a regex](/figures/RegexDuplication.png)
+![Renaming classes with a regex](./figures/RegexDuplication.png)
 
 Once the classes are duplicated, the `MyColor` class needs to be initialized. Once this is done, the 16 tests of `MyColorTest` are green. 
 
-![Initalising the MyColor Class](/figures/ColorClassInitialisation.png)
+![Initalising the MyColor Class](./figures/ColorClassInitialisation.png)
 
 At this point, we can check that we have no remaining dependencies to the original `Colors` package by right clicking the package name and chosing `Browse dependencies`. We can check in the picture below that in the left most column we do not see the `Colors` package. 
 
-![Dependencies browser for MyColors package](/figures/MyColorsDependenciesBrowser.png)
+![Dependencies browser for MyColors package](./figures/MyColorsDependenciesBrowser.png)
 
 We can now run a mutation analysis on our duplicated version of `Colors`:
 
