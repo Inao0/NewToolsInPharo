@@ -3,8 +3,8 @@
 
 _Authors:_ Iona Thomas -- Univ. Lille, Inria, CNRS, Centrale Lille, UMR 9189 CRIStAL, Lille, France -- iona.thomas@inria.fr and Pol Durieux -- Univ. Lille, Inria, CNRS, Centrale Lille, UMR 9189 CRIStAL, Lille, France -- pol.durieux@inria.fr
 
-Mutation testing is a way of measuring the quality and completeness of a project's tests suite. While code coverage is used to make sure that tests execute each method or line of code, mutation testing evaluate the ability to detect new errors. It involves introducing errors and running the tests to see if they are detected. MuTalk is a flexible mutation framework providing good default values for analyzing a test suite. It can be customized to fit specific domains or projects.
-Through this chapter we will discuss :
+Mutation testing is a way of measuring the quality and completeness of a project's test suite. While code coverage is used to make sure that tests execute each method or line of code, mutation testing evaluates the ability to detect new errors. It involves introducing errors and running the tests to see if they are detected. MuTalk is a flexible mutation framework that provides good default values for analyzing a test suite. It can be customized to fit specific domains or projects.
+In this chapter we will discuss :
 - 1. Introduction to Mutation Testing
 - 2. How to use MuTalk / Quick Start
 - 3. Available options in MuTalk
@@ -14,13 +14,13 @@ Through this chapter we will discuss :
 
 #### Principles of Mutation Testing and Vocabulary
 
-Mutation testing allows one to measure the quality and completeness of a project's tests suite. This is done by introducing errors, known as **mutations**, into the source code of a project, for example in a method. This modified method is called a **mutant**. The version of the code containing a mutant is called the **mutated code**. The idea behind mutations is to simulate real mistakes that developers can make.
+Mutation testing allows one to measure the quality and completeness of a project's test suite. This is done by introducing errors, known as **mutations**, into the source code of a project, for example in a method. This modified method is called a **mutant**. The version of the code containing a mutant is called the **mutated code**. The idea behind mutations is to simulate real mistakes that developers may make.
 
 ![Mutation vocabulary](./figures/Mutant.png)
 
 
 Then the tests are run for each mutant to see if they are able to detect it. There are two possible scenarios:
-* if the tests are green, the mutants have not been detected. They are said to have **survived**.
+* if the tests are green, the mutants were not detected. They are said to have **survived**.
 * if the tests are red, the mutants have been detected. They are said to have been **killed**.
 
 ![Two possible results for each mutants](./figures/Test.png)
@@ -60,13 +60,13 @@ testHasFourWheels
  aVehicle := MyVehicle newWithWheels: 4.
  self assert: aVehicle hasFourWheels
 ```
-Mutants are introduced one at a time. The mutant on the number of wheels will result in this test failing. This mutant has been killed.
+Mutants are introduced one at a time. The mutant on the number of wheels will cause this test to fail. This mutant has been killed.
 The mutant on the comparison sign will pass the test. This mutant has survived.
 
 
 #### The Mutation Score : a Test Suite Metric.
 
-The ideal case for a test suite is to kill all mutants, as the tests are designed to detect errors in the code. If mutants survive, this means that if a real error is introduced into the project's source code during a development phase, it may not be detected before deployment and cause bugs later on.
+The ideal case for a test suite is to kill all mutants, since the tests are designed to detect errors in the code. If mutants survive, this means that if a real error is introduced into the project's source code during a development phase, it may not be detected before deployment and cause bugs later on.
 
 The percentage of mutants killed is summarized with a mutation score, defined as:
 
@@ -269,7 +269,7 @@ myBudget := MTPercentageOfMutantsBudget for: 50
 What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
 
 For example, this is a graph of mutation score as a function of the percentage of mutants evaluated.
-![Boxplots representing the mutation score distribution for each percentage of mutants evaluated over the total number of mutants available. Each box was created by running a mutation analysis 10 times with each percentage](./figures/Score%20percent%20graph.png) ( TODO recadrer + légende)
+![Boxplots representing the mutation score distribution for each percentage of mutants evaluated over the total number of mutants available. Each box was created by running a mutation analysis 10 times with each percentage](./figures/Score%20percent%20graph.png)
 For each percent, an analysis was run 10 times with a simple random mutant selection strategy, and the mutation score of each analysis was computed. Then a boxplot was drawn with those 10 scores. 
 
 It shows that even though there is a greater variance the lower the percentage is, the median is still relatively close to the mutation score at 100%.
@@ -303,6 +303,7 @@ This strategy consists simply in not mixing the list of mutants and returning it
 
 
 #### General test filters
+@testFilters
 
 Test filters allow you to block certain tests for the whole analysis according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
 ```smalltalk
@@ -459,10 +460,10 @@ This is the inspector on the result object of the analysis. From top to bottom :
     - The `Surviving Mutants` tab lists all the mutants that survived.
     - The `Killed Mutants` tab lists all the mutants that were killed.
     - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
-    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (TODO ref vers test filters) and why they were rejected.
+    - The `Excluded Tests` tab lists the tests that were rejected by the test filter (*@testFilters@*) and why they were rejected.
 * For the mutants tabs, the inspector displays a list of mutants with their names. This includes the type of mutation applied, and the mutated class and method (Ex: `Increase a literal integer in MyVehicle class>>#newSimpleCar`). When clicking on a mutant, it shows below the code of the original method on the left and the mutated code on the right. Differences are highlighted in green and red. On the image below, we can see that a number was decreased by the mutation from 4 to 3.
 
-By looking at the first tab on surviving mutants, one can see which cases should be targeted by new tests to improve the tests suite.
+By looking at the first tab on surviving mutants, one can see which cases should be targeted by new tests to improve the test suite.
 
 
 #### Mutation matrix: a visual representation
@@ -558,7 +559,7 @@ and:
 operatorAnalysis operatorsProducingAtLeast: 10
 ```
 
-TODO: Example
+![Results of a mutation operator analysis run on MyVehicle. Here are the operators that produced at least 3 mutants %width=75](./figures/Operator%20Analysis.png)
 
 #### Non-mutated methods
 
