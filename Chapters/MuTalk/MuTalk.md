@@ -545,15 +545,15 @@ The rows are the mutants, and the columns the tests. A blue box means the mutant
 In this matrix, the mutation that increased a literal integer in MyVehicle>>#hasFourWheels has been killed by both #testHasFourWheels and #testSimpleCarHasFourWheels. 
 
 
-A heatmap can also be generated. It groups mutants by mutation operators and tests by class to summarise the data.  
-The heatmap can be displayed as follows:
+A heatmap can also be generated. It groups tests by class and mutants by mutation operators, class, method, or any other grouping condition given as a block, to better summarise the data.  
+The heatmap can be displayed as follows, when mutants are grouped by method:
 ```smalltalk
-matrix generateHeatmap
+matrix generateHeatmapByMethod
 ```
 
-This is the heatmap built also on `MyVehicle` that groups by test class and types of mutations :
+This is the heatmap built also on `MyVehicle` that groups mutants by mutation operators:
 ![Heatmap of MyVehicle](./figures/MyVehicleHeatmapCropped.pdf)  
-Here the number in each cell is the percentage of tests in the test class that killed the mutants of each type of mutant operators used in the analysis.
+Here the number in each cell is the percentage of tests in the test class that killed the mutants of each type of operators used in the analysis.
 
 
 It is now possible to obtain several pieces of information:
