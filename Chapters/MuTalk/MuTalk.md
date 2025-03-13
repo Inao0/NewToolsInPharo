@@ -153,8 +153,6 @@ analysis generalResult inspect
 MuTalk offers several options for configuring the analysis and good default values. They allow to select which kind of mutation to apply, which methods to mutate, allocating budgets for the analysis, filtering the tests to use and logging. This sections goes into details about each of those options. If you are not interested in the details of these options, you can skip ahead to the next section on [exploring the results](#exploring-the-results)
 
 
-**Note:** In the following section, if nothing is specified regarding the use of the objects mentioned, simply create the object with `new`. If you need to specify an additional parameter when creating the object, this will be indicated.
-
 #### Choosing the type of mutations
 
 Mutation operators are objects that define a type of mutation and how to perform it. For example, there's a mutation operator that changes a `+` into a `-`. In MuTalk, they all have an *Operators* tag and are subclasses of `MTAbstractMutantOperator`. By default, they are all used, but if you want to use only some of them, proceed as follows *(don't forget to give actual instances of operators, not just the class)*:
@@ -229,8 +227,15 @@ analysis mutantGenerationStrategy: myMutantGenerationStrategy
 ```
 ##### `MTAllMutantGenerationStrategy`  
 The default strategy is to mutate all methods of the provided classes.
+```smalltalk
+myMutantGenerationStrategy := MTAllMutantGenerationStrategy new
+```
+
 ##### `MTSelectingFromCoverageMutantGenerationStrategy`  
 Another strategy is to mutate only those methods that are covered by tests, again to save execution time.
+```smalltalk
+myMutantGenerationStrategy := MTSelectingFromCoverageMutantGenerationStrategy new
+```
 
 ##### `MTManualMutatedMethodGenerationStrategy`  
 This strategy is based on manual selection of the methods to be mutated, i.e. providing the mutant selection strategy with a collection of methods. The mutations will then be applied to these methods and not to those given at analysis creation.  
@@ -256,13 +261,16 @@ myBudget := MTTimeBudget for: 2 minutes
 ```
 ##### `MTFreeBudget`  
 This budget imposes no restrictions on analysis.
+```smalltalk
+myBudget := MTFreeBudget new
+```
 
 ##### `MTFixedNumberOfMutantsBudget` and `MTPercentageOfMutantsBudget`.  
 These budgets impose a restriction on the number of mutants analyzed, respectively in absolute number of mutants or in percentage of mutants.  
 To use them, you need to specify a number of mutants or a percentage, as follows:
 ```smalltalk
 myBudget := MTFixedNumberOfMutantsBudget for: 100
-“or
+“or"
 myBudget := MTPercentageOfMutantsBudget for: 50
 ```
 
@@ -285,6 +293,14 @@ analysis mutantSelectionStrategy: myMutantSelectionStrategy
 ##### `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`  
 These strategies shuffle mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
 These strategies are particularly useful when reducing the number of mutants analyzed with budgets (*@budgets@*). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
+```smalltalk
+myMutantSelectionStrategy := MTRandomClassMutantSelectionStrategy new
+“or"
+myMutantSelectionStrategy := MTRandomMethodMutantSelectionStrategy new
+"or"
+myMutantSelectionStrategy := MTRandomOperatorMutantSelectionStrategy new
+```
+
 
 ![Process of specific random selections](./figures/Random2.png)
 Let's say there are four operators: A, B, C and D, and they each produce some mutants. A produces half of the total mutants, D produces very few of them, while B and C produce the rest. For the purpose of the example we will consider that all the operators still generate a lot of mutants, just that the representation in the total number of generated mutants are different.  
@@ -297,9 +313,15 @@ In this example, a random operator selection strategy ensures that operator D is
 
 ##### `MTRandomMutantSelectionStrategy`  
 This strategy is to shuffle all mutants randomly and indiscriminately.
+```smalltalk
+myMutantSelectionStrategy := MTRandomMutantSelectionStrategy new
+```
 
 ##### `MTMutantSelectionStrategy`  
 This strategy consists simply in not mixing the list of mutants and returning it as it is. This should NOT be used with a budgeted analysis as it would result in a very biased selection.
+```smalltalk
+myMutantSelectionStrategy := MTMutantSelectionStrategy new
+```
 
 
 #### General test filters
@@ -320,6 +342,9 @@ myTestFilter := MTCompositeTestFilter for: { testFilter1 . testFilter2 }
 
 ##### `MTFreeTestFilter`  
 This filter lets everything through.
+```smalltalk
+myTestFilter := MTFreeTestFilter new
+```
 
 ##### `MTBlockTestFilter`  
 This filter only lets through tests that respect the condition of the block it receives.  
@@ -345,7 +370,11 @@ myTestFilter := MTPragmaRejectionTestFilter for: #aPragma
 ##### `MTRedTestFilter`
 @redTestFilter
 
-This filter blocks tests that fail, i.e. that are red. For MuTalk it's important that the tests are all green before applying the mutations, because when it evaluates the mutants it's the red tests that will tell whether they're killed or not, hence the usefulness of this filter.  
+This filter blocks tests that fail, i.e. that are red. For MuTalk it's important that the tests are all green before applying the mutations, because when it evaluates the mutants it's the red tests that will tell whether they're killed or not, hence the usefulness of this filter.
+```smalltalk
+myTestFilter := MTRedTestFilter new
+```
+
 
 ##### `MTTimeTestFilter`  
 This filter blocks tests that take longer than a given time to run. If the duration is well chosen, it can eliminate tests that are too time-consuming.  
@@ -363,10 +392,15 @@ analysis mutantGenerationStrategy: myTestSelectionStrategy
 ```
 ##### `MTSelectingFromCoverageTestSelectionStrategy`  
 The default is to select only those tests that cover mutants, to speed up analysis. In other words when evaluating a mutant, if a test does not use the mutated method, it will not be run for this evaluation.
+```smalltalk
+myTestSelectionStrategy := MTSelectingFromCoverageTestSelectionStrategy new
+```
 
 ##### `MTAllTestsMethodsRunningTestSelectionStrategy`  
 Another more basic strategy is to run all tests all the time, but this is more time-consuming.
-
+```smalltalk
+myTestSelectionStrategy := MTAllTestsMethodsRunningTestSelectionStrategy new
+```
 
 #### Loggers
 
@@ -377,9 +411,15 @@ analysis logger: myLogger
 
 ##### `MTProgressBarLogger`  
 This logger is selected by default for analysis. It uses a progress bar to display the progress of the analysis in real time.
+```smalltalk
+myLogger := MTProgressBarLogger new
+```
 
 ##### `MTNullLogger`  
 This logger logs nothing.
+```smalltalk
+myLogger := MTNullLogger new
+```
 
 ##### `MTFileLogger`  
 This logger writes the trace to a file whose name must be given. The logger will create the file.  
@@ -390,7 +430,9 @@ myLogger := MTFileLogger toFileNamed: 'log.txt'
 
 ##### `MTTranscriptLogger`  
 This logger writes the trace in the Pharo's Transcript.
-
+```smalltalk
+myLogger := MTTranscriptLogger new
+```
 
 
 ### Handling core classes
