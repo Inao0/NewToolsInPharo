@@ -90,7 +90,7 @@ Once those are provided, the analysis then goes through 4 phases:
 
 ##### Initial test run
 
-The analysis will run every tests it was given. If a test fails, the analysis stops and inform the user that they should fix the tests. To avoid this, check the red tests filter (*@redTestFilter@*).
+The analysis will run every tests it was given. If a test fails, the analysis stops and informs the user that they should fix the tests. To avoid this, check the red tests filter (*@redTestFilter@*).
 
 ##### Coverage analysis
 
@@ -232,7 +232,7 @@ myMutantGenerationStrategy := MTAllMutantGenerationStrategy new.
 ```
 
 ##### `MTSelectingFromCoverageMutantGenerationStrategy`  
-Another strategy is to mutate only those methods that are covered by tests, again to save execution time.
+Another strategy is to mutate only the methods that are covered by tests to save execution time.
 ```smalltalk
 myMutantGenerationStrategy := MTSelectingFromCoverageMutantGenerationStrategy new.
 ```
