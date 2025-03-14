@@ -109,11 +109,11 @@ Finally, the analysis takes the mutants and apply them one by one. It installs a
 @quickStart
 
 ##### Loading MuTalk
-Latest release (2.5.0):
+Latest release (2.6.0):
 ```Smalltalk
 Metacello new
   baseline: 'MuTalk';
-  repository: 'github://pharo-contributions/mutalk:v2.5.0/src';
+  repository: 'github://pharo-contributions/mutalk:v2.6.0/src';
   load.
 ```
 Latest version (unstable):
