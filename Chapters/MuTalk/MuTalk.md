@@ -90,7 +90,7 @@ Once those are provided, the analysis then goes through 4 phases:
 
 ##### Initial test run
 
-The analysis will run every tests it was given. If a test fails, the analysis stops and inform the user that they should fix the tests. To avoid this, check the red tests filter (*@redTestFilter@*).
+The analysis will run every tests it was given. If a test fails, the analysis stops and informs the user that they should fix the tests. To avoid this, check the red tests filter (*@redTestFilter@*).
 
 ##### Coverage analysis
 
@@ -109,11 +109,11 @@ Finally, the analysis takes the mutants and apply them one by one. It installs a
 @quickStart
 
 ##### Loading MuTalk
-Latest release (2.5.0):
+Latest release (2.6.0):
 ```Smalltalk
 Metacello new
   baseline: 'MuTalk';
-  repository: 'github://pharo-contributions/mutalk:v2.5.0/src';
+  repository: 'github://pharo-contributions/mutalk:v2.6.0/src';
   load.
 ```
 Latest version (unstable):
@@ -153,13 +153,11 @@ analysis generalResult inspect
 MuTalk offers several options for configuring the analysis and good default values. They allow to select which kind of mutation to apply, which methods to mutate, allocating budgets for the analysis, filtering the tests to use and logging. This sections goes into details about each of those options. If you are not interested in the details of these options, you can skip ahead to the next section on [exploring the results](#exploring-the-results)
 
 
-**Note:** In the following section, if nothing is specified regarding the use of the objects mentioned, simply create the object with `new`. If you need to specify an additional parameter when creating the object, this will be indicated.
-
 #### Choosing the type of mutations
 
 Mutation operators are objects that define a type of mutation and how to perform it. For example, there's a mutation operator that changes a `+` into a `-`. In MuTalk, they all have an *Operators* tag and are subclasses of `MTAbstractMutantOperator`. By default, they are all used, but if you want to use only some of them, proceed as follows *(don't forget to give actual instances of operators, not just the class)*:
 ```smalltalk
-analysis operators: { MTRemoveCaretOperator new. MTReplaceDivisionWithMultiplicationMutantOperator new. MTReplaceIfFalseReceiverWithTrueOperator new }
+analysis operators: { MTRemoveCaretOperator new. MTReplaceDivisionWithMultiplicationMutantOperator new. MTReplaceIfFalseReceiverWithTrueOperator new }.
 ``` 
 
 There are a lot of operators, available by default in MuTalk. The table below provides a list of what the current operators do. If these operators are not sufficient and/or if you require domains specific mutations, one can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.
@@ -225,18 +223,25 @@ There are a lot of operators, available by default in MuTalk. The table below pr
 
 Mutant generation strategies are ways of choosing which methods will be mutated. Each strategy is implemented as a subclass of `MTMutantGenerationStrategy`. They are tagged *Mutant generation strategies* in the package `MuTalk-Model` and are used as follows:  
 ```smalltalk
-analysis mutantGenerationStrategy: myMutantGenerationStrategy
+analysis mutantGenerationStrategy: myMutantGenerationStrategy.
 ```
 ##### `MTAllMutantGenerationStrategy`  
 The default strategy is to mutate all methods of the provided classes.
+```smalltalk
+myMutantGenerationStrategy := MTAllMutantGenerationStrategy new.
+```
+
 ##### `MTSelectingFromCoverageMutantGenerationStrategy`  
-Another strategy is to mutate only those methods that are covered by tests, again to save execution time.
+Another strategy is to mutate only the methods that are covered by tests to save execution time.
+```smalltalk
+myMutantGenerationStrategy := MTSelectingFromCoverageMutantGenerationStrategy new.
+```
 
 ##### `MTManualMutatedMethodGenerationStrategy`  
 This strategy is based on manual selection of the methods to be mutated, i.e. providing the mutant selection strategy with a collection of methods. The mutations will then be applied to these methods and not to those given at analysis creation.  
 To use this strategy:
 ```smalltalk
-myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new targetMethods: { MyVehicle>>#numberOfWheels: . MyVehicle>>#hasFourWheels }
+myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new targetMethods: { MyVehicle>>#numberOfWheels: . MyVehicle>>#hasFourWheels }.
 ```
 
 
@@ -245,25 +250,28 @@ myMutantGenerationStrategy := MTManualMutatedMethodGenerationStrategy new target
 
 Execution budgets define limits to the analysis, such as an execution time limit. In MuTalk, they have the tag *Budgets* and are used as follows:
 ```smalltalk
-analysis budget: myBudget
+analysis budget: myBudget.
 ```
 
 ##### `MTTimeBudget`  
 The default budget imposes a time limit on the analysis. After this time, the analysis ends.  
 To use it, you need to give a time, for example:
 ```smalltalk
-myBudget := MTTimeBudget for: 2 minutes
+myBudget := MTTimeBudget for: 2 minutes.
 ```
 ##### `MTFreeBudget`  
 This budget imposes no restrictions on analysis.
+```smalltalk
+myBudget := MTFreeBudget new.
+```
 
 ##### `MTFixedNumberOfMutantsBudget` and `MTPercentageOfMutantsBudget`.  
 These budgets impose a restriction on the number of mutants analyzed, respectively in absolute number of mutants or in percentage of mutants.  
 To use them, you need to specify a number of mutants or a percentage, as follows:
 ```smalltalk
-myBudget := MTFixedNumberOfMutantsBudget for: 100
-“or
-myBudget := MTPercentageOfMutantsBudget for: 50
+myBudget := MTFixedNumberOfMutantsBudget for: 100.
+“or"
+myBudget := MTPercentageOfMutantsBudget for: 50.
 ```
 
 What is interesting to note is that it is not necessary to evaluate all mutants to have a general idea of the mutation score of some classes.
@@ -279,12 +287,20 @@ It shows that even though there is a greater variance the lower the percentage i
 When running an analysis with a budget (*@budgets@*), not all mutants can be evaluated. In this context it is important to think about which mutants will be chosen for the analysis, and not to lose too much information. Even though there is no way to measure the value of a mutant in an analysis yet in MuTalk, a basic asumption is that it is important to have diversity.  
 Mutant selection strategies define which mutants will be used for analysis, and in which order. They are attributes of mutant generation strategies. In MuTalk, they have the tag *Mutant selection strategies* and are used as follows:
 ```smalltalk
-analysis mutantSelectionStrategy: myMutantSelectionStrategy
+analysis mutantSelectionStrategy: myMutantSelectionStrategy.
 ```
 
 ##### `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`  
 These strategies shuffle mutants randomly, but in a particular way. They respectively randomly select a class, method or mutation operator, then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
 These strategies are particularly useful when reducing the number of mutants analyzed with budgets (*@budgets@*). They enable classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants decreases.
+```smalltalk
+myMutantSelectionStrategy := MTRandomClassMutantSelectionStrategy new.
+“or"
+myMutantSelectionStrategy := MTRandomMethodMutantSelectionStrategy new.
+"or"
+myMutantSelectionStrategy := MTRandomOperatorMutantSelectionStrategy new.
+```
+
 
 ![Process of specific random selections](./figures/Random2.png)
 Let's say there are four operators: A, B, C and D, and they each produce some mutants. A produces half of the total mutants, D produces very few of them, while B and C produce the rest. For the purpose of the example we will consider that all the operators still generate a lot of mutants, just that the representation in the total number of generated mutants are different.  
@@ -297,9 +313,15 @@ In this example, a random operator selection strategy ensures that operator D is
 
 ##### `MTRandomMutantSelectionStrategy`  
 This strategy is to shuffle all mutants randomly and indiscriminately.
+```smalltalk
+myMutantSelectionStrategy := MTRandomMutantSelectionStrategy new.
+```
 
 ##### `MTMutantSelectionStrategy`  
 This strategy consists simply in not mixing the list of mutants and returning it as it is. This should NOT be used with a budgeted analysis as it would result in a very biased selection.
+```smalltalk
+myMutantSelectionStrategy := MTMutantSelectionStrategy new.
+```
 
 
 #### General test filters
@@ -307,7 +329,7 @@ This strategy consists simply in not mixing the list of mutants and returning it
 
 Test filters allow you to block certain tests for the whole analysis according to certain criteria. These blocked tests will then not be executed during mutant evaluation. Filters are tagged *Test filters* in MuTalk and are used as follows:
 ```smalltalk
-analysis testFilter: myTestFilter
+analysis testFilter: myTestFilter.
 ```
 
 ##### `MTCompositeTestFilter`  
@@ -315,43 +337,50 @@ This is the default test filter used by the analysis, used with a red test filte
 This test filter works as a combination of multiple test filters. It has a collection of test filters as an attribute, and the test collection passes through each filter. A test is blocked by the composite if any of its filters blocks the test, and it passes through the composite if it passes through all its filters.  
 To use it:
 ```smalltalk
-myTestFilter := MTCompositeTestFilter for: { testFilter1 . testFilter2 }
+myTestFilter := MTCompositeTestFilter for: { MTRedTestFilter new . MTTimeTestFilter for: 2 seconds }.
 ```
 
 ##### `MTFreeTestFilter`  
 This filter lets everything through.
+```smalltalk
+myTestFilter := MTFreeTestFilter new.
+```
 
 ##### `MTBlockTestFilter`  
 This filter only lets through tests that respect the condition of the block it receives.  
 It is used in this way, for example:
 ```smalltalk
-myTestFilter := MTBlockTestFilter for: [ :testCase | testCase selector endsWith: 'test' ]
+myTestFilter := MTBlockTestFilter for: [ :testCase | testCase selector endsWith: 'test' ].
 ```
 
 ##### `MTPragmaSelectionTestFilter`  
 This filter uses Pharo's pragmas as a condition for filtering tests. It only keeps tests that contain a given pragma.  
 To use this filter:
 ```smalltalk
-myTestFilter := MTPragmaSelectionTestFilter for: #aPragma
+myTestFilter := MTPragmaSelectionTestFilter for: #aPragma.
 ```
 
 ##### `MTPragmaRejectionTestFilter`  
 This filter works similarly to the previous one, but instead it blocks tests that contain the given pragma.  
 To use it:
 ```smalltalk
-myTestFilter := MTPragmaRejectionTestFilter for: #aPragma
+myTestFilter := MTPragmaRejectionTestFilter for: #aPragma.
 ```
 
 ##### `MTRedTestFilter`
 @redTestFilter
 
-This filter blocks tests that fail, i.e. that are red. For MuTalk it's important that the tests are all green before applying the mutations, because when it evaluates the mutants it's the red tests that will tell whether they're killed or not, hence the usefulness of this filter.  
+This filter blocks tests that fail, i.e. that are red. For MuTalk it's important that the tests are all green before applying the mutations, because when it evaluates the mutants it's the red tests that will tell whether they're killed or not, hence the usefulness of this filter.
+```smalltalk
+myTestFilter := MTRedTestFilter new.
+```
+
 
 ##### `MTTimeTestFilter`  
 This filter blocks tests that take longer than a given time to run. If the duration is well chosen, it can eliminate tests that are too time-consuming.  
 This is how it is used:
 ```smalltalk
-myTestFilter := MTTimeTestFilter for: 2 seconds
+myTestFilter := MTTimeTestFilter for: 2 seconds.
 ```
 
 
@@ -359,38 +388,51 @@ myTestFilter := MTTimeTestFilter for: 2 seconds
 
 Test selection strategies are ways of choosing which tests will be run for each mutant evaluation. In MuTalk, they have the tag *Test selection strategies* and are used as follows:
 ```smalltalk
-analysis mutantGenerationStrategy: myTestSelectionStrategy
+analysis testSelectionStrategy: myTestSelectionStrategy.
 ```
 ##### `MTSelectingFromCoverageTestSelectionStrategy`  
 The default is to select only those tests that cover mutants, to speed up analysis. In other words when evaluating a mutant, if a test does not use the mutated method, it will not be run for this evaluation.
+```smalltalk
+myTestSelectionStrategy := MTSelectingFromCoverageTestSelectionStrategy new.
+```
 
 ##### `MTAllTestsMethodsRunningTestSelectionStrategy`  
 Another more basic strategy is to run all tests all the time, but this is more time-consuming.
-
+```smalltalk
+myTestSelectionStrategy := MTAllTestsMethodsRunningTestSelectionStrategy new.
+```
 
 #### Loggers
 
 Loggers provide traces of analysis execution. Depending on the logger used, this trace will be visible in different places. In MuTalk, they have the *Logging* tag and are used as follows:
 ```smalltalk
-analysis logger: myLogger
+analysis logger: myLogger.
 ```
 
 ##### `MTProgressBarLogger`  
 This logger is selected by default for analysis. It uses a progress bar to display the progress of the analysis in real time.
+```smalltalk
+myLogger := MTProgressBarLogger new.
+```
 
 ##### `MTNullLogger`  
 This logger logs nothing.
+```smalltalk
+myLogger := MTNullLogger new.
+```
 
 ##### `MTFileLogger`  
 This logger writes the trace to a file whose name must be given. The logger will create the file.  
 To use it:
 ```smalltalk
-myLogger := MTFileLogger toFileNamed: 'log.txt'
+myLogger := MTFileLogger toFileNamed: 'log.txt'.
 ```
 
 ##### `MTTranscriptLogger`  
 This logger writes the trace in the Pharo's Transcript.
-
+```smalltalk
+myLogger := MTTranscriptLogger new.
+```
 
 
 ### Handling core classes
@@ -401,19 +443,19 @@ One solution to be able to run mutation testing on such classes is to create a c
 
 Let's take the exemple of `Color`, which is used for all the UI. For this example we will temporarily move the test class of `Color` into the `Colors` package. With them together, we can duplicate both at the same time, allowing the duplication to rewrite referenences to `Color` into the tests to `MyColor`, the duplicated version.
 
-![Duplicating the Colors package](/figures/ColorPackageDuplication.png)
+![Duplicating the Colors package](./figures/ColorPackageDuplication.png)
 
 Using a regular expression, we copy all classes and we prefix their duplicated name with `My` to differentiate them. 
 
-![Renaming classes with a regex](/figures/RegexDuplication.png)
+![Renaming classes with a regex](./figures/RegexDuplication.png)
 
 Once the classes are duplicated, the `MyColor` class needs to be initialized. Once this is done, the 16 tests of `MyColorTest` are green. 
 
-![Initalising the MyColor Class](/figures/ColorClassInitialisation.png)
+![Initalising the MyColor Class](./figures/ColorClassInitialisation.png)
 
 At this point, we can check that we have no remaining dependencies to the original `Colors` package by right clicking the package name and chosing `Browse dependencies`. We can check in the picture below that in the left most column we do not see the `Colors` package. 
 
-![Dependencies browser for MyColors package](/figures/MyColorsDependenciesBrowser.png)
+![Dependencies browser for MyColors package](./figures/MyColorsDependenciesBrowser.png)
 
 We can now run a mutation analysis on our duplicated version of `Colors`:
 
@@ -424,9 +466,6 @@ analysis testClasses: { MyColorTest }.
 analysis run.
 analysis generalResult inspect
 ```
-TODO test code above with latest version
-
-
 
 However even those tools have some limits. For example implicit references such as pseudo variable or creating objects with literals won't be caught. For example, most tests for booleans use the `true` and `false` pseudo variables. These make the reference to the Boolean class implicit, and it won't be rewritten to point to the new class boolean class when duplicating those. Using a literal notation in tests such as `#( 1 2 7)` won't be rewritten when trying to duplicate `Array` for mutation testing. Finally some syntactic sugar such as sending a message to a first class to create an instance of a second one also blinds the rewritting during duplication. When duplicating `Point` and its tests, test using the `@` message to create points (ex: 1@6 creates a point where x is 1 and y is 6) are not rewritten.
 
@@ -503,15 +542,15 @@ The rows are the mutants, and the columns the tests. A blue box means the mutant
 In this matrix, the mutation that increased a literal integer in MyVehicle>>#hasFourWheels has been killed by both #testHasFourWheels and #testSimpleCarHasFourWheels. 
 
 
-A heatmap can also be generated. It groups mutants by mutation operators and tests by class to summarise the data.  
-The heatmap can be displayed as follows:
+A heatmap can also be generated. It groups tests by class and mutants by mutation operators, class, method, or any other grouping condition given as a block, to better summarise the data.  
+The heatmap can be displayed as follows, when mutants are grouped by method:
 ```smalltalk
-matrix generateHeatmap
+matrix generateHeatmapByMethod
 ```
 
-This is the heatmap built also on `MyVehicle` that groups by test class and types of mutations :
+This is the heatmap built also on `MyVehicle` that groups mutants by mutation operators:
 ![Heatmap of MyVehicle](./figures/MyVehicleHeatmapCropped.pdf)  
-Here the number in each cell is the percentage of tests in the test class that killed the mutants of each type of mutant operators used in the analysis.
+Here the number in each cell is the percentage of tests in the test class that killed the mutants of each type of operators used in the analysis.
 
 
 It is now possible to obtain several pieces of information:
