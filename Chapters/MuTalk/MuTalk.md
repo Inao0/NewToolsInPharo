@@ -162,62 +162,9 @@ analysis operators: { MTRemoveCaretOperator new. MTReplaceDivisionWithMultiplica
 
 There are many operators, available by default in MuTalk. The table below provides a list of what the current operators do. If these operators are not sufficient and/or if you require domains specific mutations, you can add operators by subclassing ```MTAbstractMutantOperator``` and adding them as operators to the analysis.
 
-%TODO fix ?
+![](./figures/Operators%20tab1.pdf)
 
-| Category | Operators |
-| -------- | --------- |
-| Deletion | Empty method |
-| | Remove `^` |
-| | Remove exception handler |
-| | Remove `inject:into:` |
-| | Remove `not` |
-| | Remove second block argument for `detect:ifNone:` |
-| Arithmetic replacement | Replace `*` by `/` |
-| | Replace `/` with `*` |
-| | Replace `+` with `-` |
-| | Replace `-` with `+` |
-| Literal manipulation | Negate boolean |
-| | Increase integer |
-| | Decrease integer |
-| | Integer to 0 |
-| | String replacement |
-| | Empty string |
-| Logical boolean operation | Replace `and:` receiver with `true` |
-| | Replace `or:` receiver with `false` |
-| | Replace `and:` argument with `true` |
-| | Replace `or:` argument with `false` |
-| | Replace `obj and: block` with `false` |
-| | Replace `obj or: block` with `true` |
-| | Replace `and:` with `==`/`nand:`/`or:` |
-| | Replace `or:` with `xor:`/`and:`|
-| Conditional boolean operation | Replace `ifTrue:` receiver with `true`/`false` |
-| | Replace `ifFalse:` receiver with `true`/`false` |
-| | Replace `ifTrue:ifFalse:` receiver with `true`/`false` |
-| | Replace `ifFalse:ifTrue:` receiver with `true`/`false` |
-| | Replace `whileTrue:` receiver with `true`/`false` |
-| | Replace `whileFalse:` receiver with `true`/`false` |
-| | Replace `ifTrue:`/`ifFalse:` with `ifFalse:`/`ifTrue:` |
-| | Replace `whileFalse:` with `whileTrue:` |
-| | Replace `whileTrue:` with `whileFalse:` |
-| Relational operation | Replace `=`/`~=` with `~=`/`=` |
-| | Replace `(a == b)` with `(a == b) not` |
-| | Replace `<`/`>` with `>`/`<` |
-| | Replace `>=` with `=`/`>` |
-| | Replace `<=` with `=`/`<`/`>`/`true` |
-| | Replace `max:`/`min:` with `min:`/`max:` |
-| Collection operation | Replace `isEmpty` with `notEmpty` |
-| | Replace arg. for `sortBlock:` with always true block |
-| | Replace arg. for `reject:` with always true/false block |
-| | Replace arg. for `select:` with always true/false block |
-| | Replace `select:`/`reject:` with `reject:`/`select:` |
-| | Remove `at:ifAbsent:` |
-| | Remove block argument for `do:` |
-| | Replace 1st arg. for `detect:ifNone:` with always true/false block |
-| | Replace 2nd arg. for `detect:ifNone:` with empty block |
-| Message sender | Replace 1st/2nd/3rd argument of message send with `nil` |
-| | Replace message send with `yourself` |
-| Other | Replace assignment value with `nil` |
-| | Replace class reference by references to its subclasses |
+![](./figures/Operators%20tab2.pdf)
 
 #### Selection of Methods to Be Mutated
 
