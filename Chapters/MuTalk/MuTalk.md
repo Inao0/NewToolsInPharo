@@ -233,7 +233,7 @@ myMutantGenerationStrategy := MTAllMutantGenerationStrategy new.
 
 ##### `MTSelectingFromCoverageMutantGenerationStrategy`  
 Another strategy is to mutate only the methods that are covered by tests to save execution time.
-```smalltal
+```smalltalk
 myMutantGenerationStrategy := MTSelectingFromCoverageMutantGenerationStrategy new.
 ```
 
@@ -270,7 +270,7 @@ These budgets impose a limit on the number of mutants analyzed, respectively eit
 To use them, you specify a number of mutants or a percentage, as follows:
 ```smalltalk
 myBudget := MTFixedNumberOfMutantsBudget for: 100.
-“or
+“or“
 myBudget := MTPercentageOfMutantsBudget for: 50.
 ```
 
@@ -292,7 +292,7 @@ analysis mutantSelectionStrategy: myMutantSelectionStrategy.
 
 ##### `MTRandomClassMutantSelectionStrategy`, `MTRandomMethodMutantSelectionStrategy` and `MTRandomOperatorMutantSelectionStrategy`  
 These strategies randomly shuffle mutants, but in a specific way. They respectively randomly select a class, method or mutation operator, and then select a mutant from that class, method or operator. Operator selection is MuTalk's default strategy.  
-These strategies are particularly useful when reducing the number of mutants analyzed with budgets (*@budgets@*). They allow classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants reduced.
+These strategies are particularly useful when reducing the number of mutants analyzed with budgets (*@budgets@*). They allow classes/methods/operators that produce few mutants to still be represented in the final results when the number of mutants is reduced.
 ```smalltalk
 myMutantSelectionStrategy := MTRandomClassMutantSelectionStrategy new.
 “or"
@@ -333,7 +333,7 @@ analysis testFilter: myTestFilter.
 ```
 
 ##### `MTCompositeTestFilter`  
-This is the default test filter used by the analysis, used with a red test filter (to exclude faiing tests) and a time test filter (to exclude tests that are too long to run).
+This is the default test filter used by the analysis, used with a red test filter (to exclude failing tests) and a time test filter (to exclude tests that are too long to run).
 This test filter works as a combination of multiple test filters. It has a collection of test filters as an attribute, and the test collection passes through each filter. A test is blocked by the composite if any of its filters blocks the test, and it passes through the composite if it passes through all of its filters.  
 To use it:
 ```smalltalk
@@ -404,7 +404,7 @@ myTestSelectionStrategy := MTAllTestsMethodsRunningTestSelectionStrategy new.
 
 #### Loggers
 
-Loggers provide traces of analysis execution. Depending on the logger used, this trace will is visible in different places. In MuTalk, they have the *Logging* tag and are used as follows:
+Loggers provide traces of analysis execution. Depending on the logger used, this trace can be found in different places. In MuTalk, they have the *Logging* tag and are used as follows:
 ```smalltalk
 analysis logger: myLogger.
 ```
@@ -457,7 +457,7 @@ At this point, we can check that we have no remaining dependencies on the origin
 
 ![Dependencies browser for MyColors package](./figures/MyColorsDependenciesBrowser.png)
 
-We can now run a mutation analysis on our duplicated version of `Colors:
+We can now run a mutation analysis on our duplicated version of `Colors`:
 
 ```Smalltalk
 analysis := MTAnalysis new.
@@ -500,14 +500,14 @@ This is the inspector on the result object of the analysis. From top to bottom :
     - The `Killed Mutants` tab lists all the mutants that were killed.
     - The `Terminated Mutants` tab lists the mutants for which there was an issue while performing the installation or uninstallation during the evaluation.
     - The `Excluded Tests` tab lists the tests that were rejected by the test filter (*@testFilters@*) and why they were rejected.
-* For the mutants tabs, the inspector displays a list of mutants with their names. This includes the type of mutation applied, and the mutated class and method (e.g.: `Increase a literal integer in MyVehicle class>>#newSimpleCar`). When clicking on a mutant, the original code of the method is displayed on the left and the mutated code on the right. Differences are highlighted in green and red. On the image below, we can see that a number was decreased by the mutation from 4 to 3.
+* For the mutants tabs, the inspector displays a list of mutants with their names. This includes the type of mutation applied, and the mutated class and method (e.g.: `Increase a literal integer in MyVehicle class>>#newSimpleCar`). When clicking on a mutant, the original code of the method is displayed on the left and the mutated code on the right. Differences are highlighted in green and red. On the image below, you can see that a number was decreased by the mutation from 4 to 3.
 
-By looking at the first tab about surviving mutants, one can see which cases should be targeted by new tests to improve the test suite.
+By looking at the first tab about surviving mutants, you can see which cases should be targeted by new tests to improve the test suite.
 
 
 #### Mutation Matrix: a Visual Representation
 
-The mutation matrix is a matrix tht represents the results of tests for each mutant. It shows exactly which test killed which mutant. This can be useful for further analysis of the test suite.
+The mutation matrix is a matrix that represents the results of tests for each mutant. It shows exactly which test killed which mutant. This can be useful for further analysis of the test suite.
 
 There are several ways to use it:
 * with a collection of classes, assuming the associated test classes have the same names with the “Test” suffix:
